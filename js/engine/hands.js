@@ -110,8 +110,15 @@ export function describe({ category, values }) {
     case 3: return `Trío de ${rankName(a, true)}`;
     case 2: return `Doble pareja de ${rankName(a, true)} y ${rankName(b, true)}`;
     case 1: return `Pareja de ${rankName(a, true)}`;
-    default: return `Carta alta: ${rankName(a)}`;
+    default: return `Carta alta (${rankName(a)})`;
   }
+}
+
+// Cartas que "forman" la jugada (sin las acompañantes/kickers). Sirve para resaltarlas.
+export function coreCards({ category, cards }) {
+  if ([4, 5, 6, 8].includes(category)) return cards;
+  if (category === 0) return cards.slice(0, 1);
+  return cards.filter((c) => cards.filter((x) => x.rank === c.rank).length > 1);
 }
 
 // Dado un tablero y las cartas de varios jugadores, devuelve los índices de los ganadores

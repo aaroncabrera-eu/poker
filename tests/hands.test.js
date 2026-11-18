@@ -7,7 +7,7 @@ const ev = (s) => evaluate(parseCards(s));
 const beats = (a, b) => compareHands(ev(a), ev(b));
 
 test('reconoce cada categoría', () => {
-  assert.equal(ev('Ah Jd 8c 5s 2h').description, 'Carta alta: As');
+  assert.equal(ev('Ah Jd 8c 5s 2h').description, 'Carta alta (As)');
   assert.equal(ev('Kh Kd 9c 6s 3h').description, 'Pareja de Reyes');
   assert.equal(ev('Qh Qc 7d 7s Ah').description, 'Doble pareja de Reinas y Sietes');
   assert.equal(ev('8s 8h 8d Kc 4s').description, 'Trío de Ochos');
@@ -82,4 +82,13 @@ test('frecuencias de las 2.598.960 manos de 5 cartas', () => {
           for (let f = e + 1; f < 52; f++)
             counts[evaluate5([d[a], d[b], d[c], d[e], d[f]]).category]++;
   assert.deepEqual(counts, expected);
+});
+
+test('coreCards separa la jugada de los kickers', async () => {
+  const { coreCards } = await import('../js/engine/hands.js');
+  const core = (s) => coreCards(ev(s)).map(cardToString).join(' ');
+  assert.equal(core('Kh Kd 9c 6s 3h'), 'Kh Kd');
+  assert.equal(core('Qh Qc 7d 7s Ah'), 'Qh Qc 7d 7s');
+  assert.equal(core('Ah Jd 8c 5s 2h'), 'Ah');
+  assert.equal(coreCards(ev('9c 8d 7h 6s 5c')).length, 5);
 });

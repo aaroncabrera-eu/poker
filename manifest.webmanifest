@@ -1,0 +1,14 @@
+{
+  "name": "Poker paso a paso",
+  "short_name": "Poker",
+  "description": "Aprende Texas Hold'em a tu ritmo",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#0a0d0c",
+  "theme_color": "#0a0d0c",
+  "icons": [
+    { "src": "icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" }
+  ]
+}
