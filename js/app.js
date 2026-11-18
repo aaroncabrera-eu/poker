@@ -42,7 +42,7 @@ function route() {
   backLink.href = `#${r.back ?? '/'}`;
   brand.hidden = !!r.back;
   title.textContent = r.title ?? '';
-  document.title = r.title ? `${r.title} · Poker paso a paso` : 'Poker paso a paso';
+  document.title = r.title ? `${r.title} · Poker poco a poco` : 'Poker poco a poco';
   view.replaceChildren(r.render());
   window.scrollTo(0, 0);
 }

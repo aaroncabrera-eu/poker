@@ -94,21 +94,27 @@ p { margin: 0; }
   transition: transform .2s ease, opacity .2s ease, visibility .2s;
 }
 .cheatsheet.open { transform: none; opacity: 1; visibility: visible; }
-.cs-inner { max-width: var(--maxw); margin: 0 auto; padding: 16px var(--gutter) 20px; }
-.cs-intro, .cs-foot { font-size: 0.85rem; color: var(--muted); }
-.cs-foot { margin-top: 12px; }
-.cs-list { list-style: none; margin: 12px 0 0; padding: 0; }
-.cs-row { display: flex; gap: 12px; padding: 12px 0; border-top: 1px solid var(--line); }
+.cs-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px var(--gutter) 14px; }
+.cs-intro, .cs-foot { font-size: 0.75rem; line-height: 1.4; color: var(--muted); }
+.cs-foot { margin: 8px 0 0; padding-left: 16px; display: grid; gap: 2px; }
+.cs-list { list-style: none; margin: 6px 0 0; padding: 0; }
+.cs-row {
+  display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 10px;
+  padding: 3px 0; border-top: 1px solid var(--line);
+}
+.cs-name .en { line-height: 1.15; }
+.cs-row:first-child .cs-num { background: var(--accent); color: var(--accent-ink); }
 .cs-num {
-  flex: none; width: 26px; height: 26px; border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%;
   display: grid; place-items: center;
-  font-size: 0.8rem; font-weight: 700;
+  font-size: 0.7rem; font-weight: 700;
   color: var(--accent); border: 1px solid var(--accent);
 }
-.cs-body { flex: 1; display: grid; gap: 6px; }
-.cs-title { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-.en { color: var(--muted); font-size: 0.8rem; font-style: italic; }
-.cs-tip { font-size: 0.85rem; color: var(--muted); }
+.cs-text { min-width: 0; }
+.cs-name { font-weight: 700; font-size: 0.9rem; line-height: 1.2; }
+.cs-name .en { display: block; font-weight: 400; }
+.en { color: var(--muted); font-size: 0.7rem; font-style: italic; }
+.cs-tip { font-size: 0.75rem; color: var(--muted); line-height: 1.25; }
 .cs-backdrop {
   position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.5);
   opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s;

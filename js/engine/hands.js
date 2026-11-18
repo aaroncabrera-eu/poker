@@ -5,24 +5,15 @@ import { rankName } from './cards.js';
 
 // Categorías de menor a mayor. Es también la fuente de datos de la chuleta.
 export const CATEGORIES = [
-  { id: 0, name: 'Carta alta', en: 'High card', example: 'Ah Jd 8c 5s 2h',
-    tip: 'Nada ligado: gana quien tenga la carta más alta.' },
-  { id: 1, name: 'Pareja', en: 'One pair', example: 'Kh Kd 9c 6s 3h',
-    tip: 'Dos cartas del mismo valor.' },
-  { id: 2, name: 'Doble pareja', en: 'Two pair', example: 'Qh Qc 7d 7s Ah',
-    tip: 'Dos parejas distintas.' },
-  { id: 3, name: 'Trío', en: 'Three of a kind', example: '8s 8h 8d Kc 4s',
-    tip: 'Tres cartas del mismo valor.' },
-  { id: 4, name: 'Escalera', en: 'Straight', example: '9c 8d 7h 6s 5c',
-    tip: 'Cinco valores seguidos, de cualquier palo. El As vale arriba (10-J-Q-K-A) o abajo (A-2-3-4-5).' },
-  { id: 5, name: 'Color', en: 'Flush', example: 'Ah Jh 9h 4h 2h',
-    tip: 'Cinco cartas del mismo palo, no seguidas.' },
-  { id: 6, name: 'Full', en: 'Full house', example: '10s 10h 10d 4c 4s',
-    tip: 'Un trío más una pareja.' },
-  { id: 7, name: 'Póker', en: 'Four of a kind', example: '5s 5h 5d 5c Ks',
-    tip: 'Cuatro cartas del mismo valor.' },
-  { id: 8, name: 'Escalera de color', en: 'Straight flush', example: '9s 8s 7s 6s 5s',
-    tip: 'Escalera con las cinco cartas del mismo palo. La más alta (10 a As) se llama escalera real (royal flush).' },
+  { id: 0, name: 'Carta alta', en: 'High card', example: 'Ah Jd 8c 5s 2h', tip: 'Nada ligado' },
+  { id: 1, name: 'Pareja', en: 'One pair', example: 'Kh Kd 9c 6s 3h', tip: 'Dos iguales' },
+  { id: 2, name: 'Doble pareja', en: 'Two pair', example: 'Qh Qc 7d 7s Ah', tip: 'Dos parejas' },
+  { id: 3, name: 'Trío', en: 'Three of a kind', example: '8s 8h 8d Kc 4s', tip: 'Tres iguales' },
+  { id: 4, name: 'Escalera', en: 'Straight', example: '9c 8d 7h 6s 5c', tip: 'Cinco seguidas' },
+  { id: 5, name: 'Color', en: 'Flush', example: 'Ah Jh 9h 4h 2h', tip: 'Cinco del mismo palo' },
+  { id: 6, name: 'Full', en: 'Full house', example: '10s 10h 10d 4c 4s', tip: 'Trío + pareja' },
+  { id: 7, name: 'Póker', en: 'Four of a kind', example: '5s 5h 5d 5c Ks', tip: 'Cuatro iguales' },
+  { id: 8, name: 'Escalera de color', en: 'Straight flush', example: '9s 8s 7s 6s 5s', tip: 'Seguidas y del mismo palo' },
 ];
 
 // Evalúa exactamente 5 cartas.

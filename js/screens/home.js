@@ -15,7 +15,7 @@ export function homeScreen() {
   return h('section', { class: 'screen home' },
     h('div', { class: 'hero' },
       renderCards(parseCards('As Kh'), { size: 'md', className: 'hero-cards' }),
-      h('h1', {}, 'Poker paso a paso'),
+      h('h1', {}, 'Poker poco a poco'),
       h('p', { class: 'muted' }, 'Aprende Texas Hold\'em a tu ritmo. Nada avanza hasta que tú quieras.'),
     ),
     h('nav', { class: 'tiles' },

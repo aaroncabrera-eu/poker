@@ -10,19 +10,23 @@ export function createCheatsheet() {
     const hand = evaluate(parseCards(cat.example));
     return h('li', { class: 'cs-row' },
       h('div', { class: 'cs-num' }, i + 1),
-      h('div', { class: 'cs-body' },
-        h('div', { class: 'cs-title' }, h('strong', {}, cat.name), h('span', { class: 'en' }, cat.en)),
-        renderCards(hand.cards, { size: 'xs', highlight: coreCards(hand), className: 'soft' }),
-        h('p', { class: 'cs-tip' }, cat.tip),
+      h('div', { class: 'cs-text' },
+        h('div', { class: 'cs-name' }, cat.name, h('span', { class: 'en' }, cat.en)),
+        h('div', { class: 'cs-tip' }, cat.tip),
       ),
+      renderCards(hand.cards, { size: 'xs', highlight: coreCards(hand), className: 'soft' }),
     );
   });
 
   const panel = h('div', { class: 'cheatsheet', id: 'cheatsheet', 'aria-hidden': 'true' },
     h('div', { class: 'cs-inner' },
-      h('p', { class: 'cs-intro' }, 'De mejor (1) a peor (9). Cada jugador forma su mejor mano con 5 cartas: sus 2 + las 5 de la mesa.'),
+      h('p', { class: 'cs-intro' }, 'De mejor (1) a peor (9). Las cartas resaltadas forman la jugada.'),
       h('ol', { class: 'cs-list' }, rows),
-      h('p', { class: 'cs-foot' }, 'Si dos manos son del mismo tipo, gana la de cartas más altas. Los palos nunca desempatan.'),
+      h('ul', { class: 'cs-foot' },
+        h('li', {}, 'Tu mano: las 5 mejores de tus 2 cartas + las 5 de la mesa.'),
+        h('li', {}, 'Mismo tipo: ganan las cartas más altas. El palo no desempata.'),
+        h('li', {}, 'El As vale arriba (10-J-Q-K-A) o abajo (A-2-3-4-5).'),
+      ),
     ),
   );
   const backdrop = h('div', { class: 'cs-backdrop', onClick: () => toggle(false) });
