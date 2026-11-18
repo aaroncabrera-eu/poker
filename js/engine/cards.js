@@ -39,6 +39,9 @@ export const parseCards = (str) => str.trim().split(/\s+/).map(parseCard);
 
 export const cardToString = (c) => (RANK_CHARS[c.rank] ?? String(c.rank)) + c.suit;
 
+// Para mostrar en textos: "10♥", "K♠".
+export const cardLabel = (c) => rankLabel(c.rank) + SUIT_SYMBOLS[c.suit];
+
 export const sameCard = (a, b) => a.rank === b.rank && a.suit === b.suit;
 
 export function newDeck() {

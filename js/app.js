@@ -9,12 +9,13 @@ import { homeScreen } from './screens/home.js';
 import { practiceScreen } from './screens/practice.js';
 import { winnerExercise } from './screens/exercise-winner.js';
 import { soonScreen } from './screens/soon.js';
+import { tableScreen } from './screens/table.js';
 
 const routes = {
   '/': { render: homeScreen },
   '/practicar': { title: 'Practicar', back: '/', render: practiceScreen },
   '/practicar/quien-gana': { title: '¿Qué mano gana?', back: '/practicar', render: winnerExercise },
-  '/jugar': { title: 'Jugar', back: '/', render: soonScreen('Aquí estará la mesa contra bots, paso a paso y con pistas.') },
+  '/jugar': { title: 'Jugar', back: '/', render: tableScreen },
   '/aprender': { title: 'Aprender', back: '/', render: soonScreen('Lecciones cortas: reglas, rondas de apuestas y posiciones.') },
   '/calculadora': { title: 'Calculadora', back: '/', render: soonScreen('Probabilidades exactas y cómo calcularlas de cabeza.') },
 };

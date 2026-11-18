@@ -19,7 +19,7 @@ export function homeScreen() {
       h('p', { class: 'muted' }, 'Aprende Texas Hold\'em a tu ritmo. Nada avanza hasta que tú quieras.'),
     ),
     h('nav', { class: 'tiles' },
-      tile('#/jugar', 'Jugar', 'Mesa contra bots, con pistas en cada jugada', { big: true, soon: true }),
+      tile('#/jugar', 'Jugar', 'Mesa contra bots, con pistas en cada jugada', { big: true }),
       tile('#/practicar', 'Practicar', 'Ejercicios cortos para entrenar', { big: true }),
       h('div', { class: 'tiles-row' },
         tile('#/aprender', 'Aprender', 'Lecciones', { soon: true }),
