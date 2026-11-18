@@ -2,6 +2,7 @@
 
 import { h } from './dom.js';
 import { renderCards } from './cards.js';
+import { createDropdown } from './dropdown.js';
 import { parseCards } from '../engine/cards.js';
 import { CATEGORIES, evaluate, coreCards } from '../engine/hands.js';
 
@@ -18,8 +19,14 @@ export function createCheatsheet() {
     );
   });
 
-  const panel = h('div', { class: 'cheatsheet', id: 'cheatsheet', 'aria-hidden': 'true' },
-    h('div', { class: 'cs-inner' },
+  const button = h('button', { class: 'cs-toggle' },
+    'Chuleta', h('span', { class: 'chev', 'aria-hidden': 'true' }, '▾'));
+
+  return createDropdown({
+    id: 'cheatsheet',
+    label: 'Chuleta de manos',
+    button,
+    content: [
       h('p', { class: 'cs-intro' }, 'De mejor (1) a peor (9). Las cartas resaltadas forman la jugada.'),
       h('ol', { class: 'cs-list' }, rows),
       h('ul', { class: 'cs-foot' },
@@ -27,22 +34,6 @@ export function createCheatsheet() {
         h('li', {}, 'Mismo tipo: ganan las cartas más altas. El palo no desempata.'),
         h('li', {}, 'El As vale arriba (10-J-Q-K-A) o abajo (A-2-3-4-5).'),
       ),
-    ),
-  );
-  const backdrop = h('div', { class: 'cs-backdrop', onClick: () => toggle(false) });
-
-  const button = h('button', { class: 'cs-toggle', 'aria-expanded': 'false', 'aria-controls': 'cheatsheet', onClick: () => toggle() },
-    'Chuleta', h('span', { class: 'chev', 'aria-hidden': 'true' }, '▾'));
-
-  function toggle(force) {
-    const open = force ?? !panel.classList.contains('open');
-    panel.classList.toggle('open', open);
-    backdrop.classList.toggle('open', open);
-    button.setAttribute('aria-expanded', String(open));
-    panel.setAttribute('aria-hidden', String(!open));
-  }
-
-  document.addEventListener('keydown', (e) => e.key === 'Escape' && toggle(false));
-
-  return { button, panel, backdrop, close: () => toggle(false) };
+    ],
+  });
 }

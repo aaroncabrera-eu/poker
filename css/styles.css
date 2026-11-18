@@ -58,12 +58,20 @@ p { margin: 0; }
   backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--line);
 }
-.topbar-left { display: flex; align-items: center; }
+.topbar-left { display: flex; align-items: center; gap: 6px; }
+.info-toggle {
+  flex: none; width: 32px; height: 32px; border-radius: 50%;
+  display: grid; place-items: center;
+  background: var(--surface-2); color: var(--accent);
+  border: 1px solid var(--line);
+  font: italic 700 1rem/1 Georgia, "Times New Roman", serif; cursor: pointer;
+}
+.info-toggle[aria-expanded="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
 .topbar-title { font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand { display: flex; align-items: center; gap: 6px; font-weight: 700; letter-spacing: -0.01em; }
 .brand-mark { color: var(--accent); }
 .back {
-  display: grid; place-items: center; width: 40px; height: 40px; margin-left: -8px;
+  display: grid; place-items: center; width: 40px; height: 40px;
   border-radius: 10px; font-size: 1.3rem;
 }
 .back:active { background: var(--surface-2); }
@@ -80,8 +88,8 @@ p { margin: 0; }
 .cs-toggle[aria-expanded="true"] { border-color: var(--accent); }
 .cs-toggle[aria-expanded="true"] .chev { transform: rotate(180deg); }
 
-/* ---------- Chuleta ---------- */
-.cheatsheet {
+/* ---------- Desplegables (chuleta y reglas) ---------- */
+.dropdown {
   position: fixed; z-index: 25; left: 0; right: 0;
   top: calc(var(--topbar) + env(safe-area-inset-top));
   max-height: calc(100dvh - var(--topbar) - env(safe-area-inset-top) - 24px);
@@ -93,8 +101,8 @@ p { margin: 0; }
   transform: translateY(-12px); opacity: 0; visibility: hidden;
   transition: transform .2s ease, opacity .2s ease, visibility .2s;
 }
-.cheatsheet.open { transform: none; opacity: 1; visibility: visible; }
-.cs-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px var(--gutter) 14px; }
+.dropdown.open { transform: none; opacity: 1; visibility: visible; }
+.dd-inner { max-width: var(--maxw); margin: 0 auto; padding: 10px var(--gutter) 14px; }
 .cs-intro, .cs-foot { font-size: 0.75rem; line-height: 1.4; color: var(--muted); }
 .cs-foot { margin: 8px 0 0; padding-left: 16px; display: grid; gap: 2px; }
 .cs-list { list-style: none; margin: 6px 0 0; padding: 0; }
@@ -115,11 +123,40 @@ p { margin: 0; }
 .cs-name .en { display: block; font-weight: 400; }
 .en { color: var(--muted); font-size: 0.7rem; font-style: italic; }
 .cs-tip { font-size: 0.75rem; color: var(--muted); line-height: 1.25; }
-.cs-backdrop {
+.dd-backdrop {
   position: fixed; inset: 0; z-index: 20; background: rgba(0,0,0,.5);
   opacity: 0; visibility: hidden; transition: opacity .2s, visibility .2s;
 }
-.cs-backdrop.open { opacity: 1; visibility: visible; }
+.dd-backdrop.open { opacity: 1; visibility: visible; }
+
+/* Reglas */
+.rules-head { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; flex-wrap: wrap; padding: 4px 0 8px; }
+.rules { display: grid; }
+.rule { border-top: 1px solid var(--line); }
+.rule summary {
+  list-style: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: space-between;
+  min-height: 44px; font-weight: 600;
+}
+.rule summary::-webkit-details-marker { display: none; }
+.rule summary::after { content: '+'; color: var(--accent); font-size: 1.2rem; font-weight: 400; }
+.rule[open] summary::after { content: '−'; }
+.rule-body { display: grid; gap: 8px; padding: 0 0 14px; font-size: 0.9rem; color: #cfd8d3; }
+.rule-body ul { margin: 0; padding-left: 18px; display: grid; gap: 6px; }
+.rule-body strong { color: var(--text); }
+.rule-body .en { font-size: 0.85em; }
+.streets {
+  list-style: none; margin: 0; padding: 0;
+  display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px;
+}
+.streets li {
+  display: grid; gap: 2px; justify-items: center; text-align: center;
+  padding: 8px 2px; border-radius: 10px;
+  background: var(--felt-2); border: 1px solid #1d4a37;
+  font-size: 0.75rem;
+}
+.streets strong { font-size: 0.8rem; }
+.streets span { color: var(--muted); font-size: 0.7rem; line-height: 1.2; }
 
 /* ---------- Pantallas ---------- */
 .view {

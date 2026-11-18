@@ -3,6 +3,8 @@
 
 import { h } from './ui/dom.js';
 import { createCheatsheet } from './ui/cheatsheet.js';
+import { createRules } from './ui/rules.js';
+import { closeAllDropdowns } from './ui/dropdown.js';
 import { homeScreen } from './screens/home.js';
 import { practiceScreen } from './screens/practice.js';
 import { winnerExercise } from './screens/exercise-winner.js';
@@ -18,6 +20,7 @@ const routes = {
 };
 
 const cheatsheet = createCheatsheet();
+const rules = createRules();
 const backLink = h('a', { class: 'back', href: '#/', 'aria-label': 'Volver' }, '←');
 const brand = h('a', { class: 'brand', href: '#/' }, h('span', { class: 'brand-mark' }, '♠'), 'Poker');
 const title = h('span', { class: 'topbar-title' });
@@ -25,19 +28,21 @@ const view = h('main', { class: 'view' });
 
 document.getElementById('app').append(
   h('header', { class: 'topbar' },
-    h('div', { class: 'topbar-left' }, backLink, brand),
+    h('div', { class: 'topbar-left' }, rules.button, backLink, brand),
     title,
     cheatsheet.button,
   ),
   cheatsheet.backdrop,
   cheatsheet.panel,
+  rules.backdrop,
+  rules.panel,
   view,
 );
 
 function route() {
   const path = location.hash.replace(/^#/, '') || '/';
   const r = routes[path] ?? routes['/'];
-  cheatsheet.close();
+  closeAllDropdowns();
   backLink.hidden = !r.back;
   backLink.href = `#${r.back ?? '/'}`;
   brand.hidden = !!r.back;
