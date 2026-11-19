@@ -1,0 +1,130 @@
+// Contenido de las lecciones. Tipos de bloque:
+//   { p: 'texto' }                     párrafo
+//   { h: 'subtítulo' }
+//   { list: ['...', '...'] }           lista
+//   { cards: 'Ah Kh', caption: '...' } cartas de ejemplo
+//   { table: [['cab', 'cab'], ['a', 'b'], ...] }  tabla (primera fila = cabecera)
+//   { tip: 'texto' }                   recuadro destacado
+
+export const LESSONS = [
+  {
+    id: 'una-mano',
+    title: 'Cómo se juega una mano',
+    sub: 'De repartir las cartas a ganar el bote',
+    blocks: [
+      { p: 'En Texas Hold\'em cada jugador recibe 2 cartas que solo ve él. Luego se ponen 5 cartas en la mesa, boca arriba, que comparten todos. Gana quien forme la mejor mano de 5 cartas mezclando las suyas con las de la mesa.' },
+      { cards: 'Ah Kd', caption: 'Tus 2 cartas (hole cards): solo las ves tú.' },
+      { h: 'Las 4 rondas' },
+      { table: [['Ronda', 'Qué pasa'], ['Preflop', 'Solo tienes tus 2 cartas. Primera ronda de apuestas.'], ['Flop', 'Salen 3 cartas a la mesa. Apuestas.'], ['Turn', 'Sale la 4ª carta. Apuestas.'], ['River', 'Sale la 5ª y última. Últimas apuestas.']] },
+      { p: 'Si después del river quedan dos o más jugadores, se enseñan las cartas (showdown) y gana la mejor mano. Pero muchas manos terminan antes: si todos se retiran menos uno, ese gana sin enseñar nada.' },
+      { h: 'Las ciegas' },
+      { p: 'Antes de repartir, los dos jugadores a la izquierda del botón (D) ponen apuestas obligatorias: la ciega pequeña y la ciega grande. Así siempre hay algo en juego. El botón se mueve una posición cada mano, para que todos paguen ciegas por turnos.' },
+      { h: 'En tu turno puedes…' },
+      { list: ['Retirarte (fold): abandonas la mano.', 'Pasar (check): no apostar, solo si nadie ha apostado.', 'Igualar (call): poner lo mismo que la apuesta más alta.', 'Apostar o subir (bet / raise): poner más fichas.'] },
+      { tip: 'Si no sabes qué hacer en una partida, toca la ⓘ de arriba: tienes las reglas siempre a mano.' },
+    ],
+    practice: { href: '#/jugar', label: 'Jugar una mano contra bots' },
+  },
+  {
+    id: 'que-mano-gana',
+    title: 'Qué mano gana',
+    sub: 'El ranking, los kickers y los empates',
+    blocks: [
+      { p: 'Hay 9 tipos de mano. Las tienes todas en la chuleta (arriba a la derecha). Lo más importante es saber cuál gana a cuál, y que cuanto más difícil es conseguir una mano, más vale.' },
+      { cards: 'Kh Kd 9c 6s 3h', caption: 'Pareja de Reyes: lo más habitual es ganar con parejas o dobles parejas.' },
+      { h: 'Si los dos tenéis el mismo tipo de mano' },
+      { list: ['Gana la de valores más altos: pareja de Reyes gana a pareja de Reinas.', 'Si también empatan, decide la carta acompañante más alta (kicker).', 'Los palos nunca desempatan. Si las 5 mejores cartas valen lo mismo, se reparte el bote.'] },
+      { cards: 'Ah Ad Kc 7s 2h', caption: 'Pareja de Ases con Rey de kicker…' },
+      { cards: 'As Ac Qd 7h 2c', caption: '…gana a pareja de Ases con Reina de kicker.' },
+      { h: 'La mano está en la mesa' },
+      { p: 'A veces tus dos cartas no mejoran lo que ya hay en la mesa. Si la mesa es 10-J-Q-K-A, todos tienen esa escalera y se reparte el bote, tengas lo que tengas.' },
+      { tip: 'Tu mano es siempre la mejor combinación de 5 cartas entre 7. Puedes usar tus 2 cartas, solo 1 o ninguna.' },
+    ],
+    practice: { href: '#/practicar/que-mano', label: 'Practicar: ¿Qué mano tienes?' },
+    practice2: { href: '#/practicar/quien-gana', label: 'Practicar: ¿Qué mano gana?' },
+  },
+  {
+    id: 'posicion',
+    title: 'La posición',
+    sub: 'Por qué importa hablar el último',
+    blocks: [
+      { p: 'La posición es tu sitio respecto al botón (D). Después del flop, el botón habla el último, y eso es una gran ventaja: antes de decidir ya has visto lo que han hecho todos los demás.' },
+      { table: [['Posición', 'Dónde', 'Cómo jugar'], ['Temprana', 'Justo después de la ciega grande', 'Solo manos fuertes'], ['Media', 'En medio', 'Algo más de manos'], ['Tardía', 'El botón y el de su derecha', 'La mejor: puedes jugar más manos'], ['Ciegas', 'Ciega pequeña y grande', 'Hablan primero después del flop: difícil']] },
+      { p: 'Si hablas el primero y pasas, no sabes si los demás van a apostar. Si hablas el último y todos han pasado, puedes apostar para llevarte el bote o pasar y ver otra carta gratis.' },
+      { tip: 'Regla sencilla: cuanto más cerca estés del botón, más manos puedes jugar.' },
+    ],
+    practice: { href: '#/jugar', label: 'Fíjate en la D en la mesa' },
+  },
+  {
+    id: 'manos-iniciales',
+    title: 'Con qué manos entrar',
+    sub: 'Una guía sencilla para el preflop',
+    blocks: [
+      { p: 'El error más típico de quien empieza es jugar demasiadas manos. La mayoría de las manos que te reparten hay que tirarlas. Esta guía es una simplificación, pero te evitará muchos disgustos.' },
+      { h: 'Muy fuertes: sube' },
+      { cards: 'Ah As', caption: 'AA, KK, QQ y AK: las mejores manos. Sube con ellas desde cualquier posición.' },
+      { h: 'Buenas: sube o iguala' },
+      { cards: 'Jh Js', caption: 'JJ, TT, AQ, AJ del mismo palo, KQ del mismo palo.' },
+      { h: 'Jugables en posición tardía' },
+      { cards: '7c 7d', caption: 'Parejas pequeñas: buscan ligar trío en el flop (pasa 1 de cada 8 veces).' },
+      { cards: '8h 9h', caption: 'Seguidas del mismo palo (suited connectors): pueden ligar escalera o color.' },
+      { h: 'Tíralas casi siempre' },
+      { cards: 'Kd 4c', caption: 'Una carta alta con otra baja de distinto palo: si ligas pareja de Reyes, alguien puede tenerla con mejor kicker.' },
+      { cards: '7s 2h', caption: '7-2 de distinto palo: la peor mano posible.' },
+      { tip: 'Del mismo palo (suited) es algo mejor que de distinto palo (offsuit), pero solo un poco: no juegues una mano mala por ser del mismo palo.' },
+    ],
+    practice: { href: '#/calculadora', label: 'Prueba manos en la calculadora' },
+  },
+  {
+    id: 'outs',
+    title: 'Outs y la regla del 2 y del 4',
+    sub: 'Calcular de cabeza tus posibilidades',
+    blocks: [
+      { p: 'Los outs son las cartas que todavía pueden salir y que mejoran tu mano. Si tienes 4 corazones y te falta 1 para el color, cualquier corazón que salga es un out.' },
+      { cards: 'Ah 7h Kh 9h 2c', caption: 'Proyecto de color: 4 corazones. Hay 13 corazones, así que quedan 9 outs.' },
+      { h: 'Proyectos típicos' },
+      { table: [['Proyecto', 'Outs'], ['Color (4 del mismo palo)', '9'], ['Escalera abierta (ej. 6-7-8-9)', '8'], ['Escalera interna (ej. 5-6-8-9)', '4'], ['Color + escalera abierta', '15'], ['Dos cartas más altas que la mesa', '6'], ['Pareja a trío', '2']] },
+      { h: 'La regla del 2 y del 4' },
+      { list: ['En el flop (quedan 2 cartas): outs × 4 = % de ligar antes del river.', 'En el turn (queda 1 carta): outs × 2 = % de ligar en el river.'] },
+      { p: 'Ejemplo: proyecto de color en el flop → 9 × 4 = 36%. La cuenta exacta da 35%: casi igual y la puedes hacer de cabeza en un segundo.' },
+      { tip: 'Si el rival apuesta en el flop, puede volver a apostar en el turn. Para decidir si pagar solo una carta, usa outs × 2.' },
+    ],
+    practice: { href: '#/practicar/outs', label: 'Practicar: ¿Cuántos outs tienes?' },
+    practice2: { href: '#/calculadora', label: 'Comprobarlo en la calculadora' },
+  },
+  {
+    id: 'pot-odds',
+    title: 'Pot odds: ¿compensa pagar?',
+    sub: 'Comparar lo que pagas con lo que puedes ganar',
+    blocks: [
+      { p: 'Cuando un rival apuesta, tienes que decidir si pagar. La pregunta clave es: ¿gano suficientes veces para que me compense lo que pago?' },
+      { h: 'La cuenta' },
+      { p: 'Porcentaje que necesitas = lo que pagas ÷ (bote + lo que pagas).' },
+      { p: 'Ejemplo: el bote tiene 100 (incluida la apuesta del rival, que ha apostado 50). Para pagar pones 50. Necesitas ganar 50 ÷ (100 + 50) = 33% de las veces.' },
+      { h: 'Atajo según el tamaño de la apuesta' },
+      { table: [['El rival apuesta…', 'Necesitas ganar'], ['¼ del bote', '17%'], ['½ bote', '25%'], ['⅔ del bote', '29%'], ['El bote entero', '33%'], ['El doble del bote', '40%']] },
+      { h: 'Juntándolo con los outs' },
+      { p: 'Tienes proyecto de color en el turn (9 outs → 9 × 2 ≈ 18%). El rival apuesta medio bote: necesitas 25%. Como 18% < 25%, a la larga pierdes pagando: retírate.' },
+      { tip: 'Si tu probabilidad es mayor que la que necesitas: paga. Si es menor: retírate. Es lo que hace la pista "¿Qué hago?" en la mesa.' },
+    ],
+    practice: { href: '#/practicar/que-harias', label: 'Practicar: ¿Qué harías?' },
+  },
+  {
+    id: 'errores',
+    title: 'Errores típicos de principiante',
+    sub: 'Lo que más fichas cuesta al empezar',
+    blocks: [
+      { list: [
+        'Jugar demasiadas manos. La mayoría hay que tirarlas antes del flop.',
+        'Pagar "para ver" sin mirar las pot odds. Pagar un poco cada vez suma mucho.',
+        'Enamorarse de una pareja alta. Pareja de Ases es buena antes del flop, pero si la mesa trae 4 cartas del mismo palo, puede no valer nada.',
+        'Ignorar el kicker. Con As-4, si sale un As, cualquiera con As y otra carta mejor te gana.',
+        'Farolear a quien lo paga todo. Contra jugadores que siempre igualan (como los bots fáciles), los faroles no funcionan: apuesta tus manos buenas.',
+        'No tener en cuenta la posición. Las mismas cartas valen más en el botón que en primera posición.',
+        'Jugar enfadado tras perder una mano (tilt). Si te pasa, haz una pausa.',
+      ] },
+      { tip: 'Un buen ejercicio: juega contra bots fáciles y pide la pista en cada decisión dudosa. Fíjate en por qué te recomienda lo que te recomienda.' },
+    ],
+    practice: { href: '#/jugar', label: 'A la mesa' },
+  },
+];

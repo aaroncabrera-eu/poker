@@ -22,8 +22,8 @@ export function homeScreen() {
       tile('#/jugar', 'Jugar', 'Mesa contra bots, con pistas en cada jugada', { big: true }),
       tile('#/practicar', 'Practicar', 'Ejercicios cortos para entrenar', { big: true }),
       h('div', { class: 'tiles-row' },
-        tile('#/aprender', 'Aprender', 'Lecciones', { soon: true }),
-        tile('#/calculadora', 'Calculadora', 'Probabilidades', { soon: true }),
+        tile('#/aprender', 'Aprender', '7 lecciones cortas'),
+        tile('#/calculadora', 'Calculadora', 'Probabilidades explicadas'),
       ),
     ),
   );

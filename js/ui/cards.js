@@ -14,11 +14,14 @@ export function renderCard(card, opts = {}) {
 
 export const renderBack = () => h('div', { class: 'card back', role: 'img', 'aria-label': 'Carta boca abajo' });
 
-// Fila de cartas. `size`: 'sm' | 'md' | 'board'. `highlight`: cartas a resaltar (el resto se atenúa).
-export function renderCards(cards, { size = 'md', highlight = null, className = '' } = {}) {
+export const renderSlot = () => h('div', { class: 'card slot', 'aria-hidden': 'true' });
+
+// Fila de cartas. `size`: 'xs' | 'sm' | 'md' | 'board'. `highlight`: cartas a resaltar (el resto se atenúa).
+// Los huecos (null) se dibujan boca abajo, o como hueco vacío si empty === 'slot'.
+export function renderCards(cards, { size = 'md', highlight = null, className = '', empty = 'back' } = {}) {
   return h('div', { class: `cards size-${size} ${className}` },
     cards.map((c) => {
-      if (!c) return renderBack();
+      if (!c) return empty === 'slot' ? renderSlot() : renderBack();
       const inHand = highlight ? highlight.some((x) => sameCard(x, c)) : false;
       return renderCard(c, { hl: highlight && inHand, dim: highlight && !inHand });
     }),

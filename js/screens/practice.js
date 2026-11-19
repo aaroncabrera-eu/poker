@@ -2,10 +2,10 @@ import { h } from '../ui/dom.js';
 import { load } from '../storage.js';
 
 const EXERCISES = [
+  { href: '#/practicar/que-mano', title: '¿Qué mano tienes?', sub: 'Encuentra tu mejor combinación de 5 cartas.', statsKey: 'stats:hand' },
   { href: '#/practicar/quien-gana', title: '¿Qué mano gana?', sub: 'Dos jugadores, una mesa: elige al ganador.', statsKey: 'stats:winner' },
-  { title: '¿Qué mano tienes?', sub: 'Encuentra tu mejor combinación de 5 cartas.' },
-  { title: '¿Cuántos outs tienes?', sub: 'Cuenta las cartas que te ayudan.' },
-  { title: '¿Qué harías?', sub: 'Decide: retirarte, pagar o subir.' },
+  { href: '#/practicar/outs', title: '¿Cuántos outs tienes?', sub: 'Cuenta las cartas que te ayudan y calcula de cabeza.', statsKey: 'stats:outs' },
+  { href: '#/practicar/que-harias', title: '¿Qué harías?', sub: 'Un rival apuesta: ¿pagas o te retiras?', statsKey: 'stats:decide' },
 ];
 
 export function practiceScreen() {
