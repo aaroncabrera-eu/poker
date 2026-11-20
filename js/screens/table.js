@@ -5,7 +5,7 @@ import { renderCard, renderCards } from '../ui/cards.js';
 import { sameCard } from '../engine/cards.js';
 import { Game, STREET_NAMES } from '../engine/game.js';
 import { decideBot, raiseTarget, BOT_NAMES, LEVELS } from '../engine/bots.js';
-import { advise, judgeAction } from '../engine/coach.js';
+import { advise, judgeAction, explainPercentages } from '../engine/coach.js';
 import { evaluate, compareHands, coreCards } from '../engine/hands.js';
 import { explainComparison } from '../engine/explain.js';
 import { load, save } from '../storage.js';
@@ -365,11 +365,20 @@ export function tableScreen() {
       h('p', {}, v.text),
       ui.showWhy
         ? h('div', { class: 'verdict-why' },
-          v.advice.lines.map((l) => h('p', { class: 'small' }, l)),
-          v.advice.math.map((l) => h('p', { class: 'small' }, l)),
-          h('p', { class: 'small' }, 'Lo recomendado era: ', h('strong', {}, v.advice.label), '.'))
-        : h('button', { class: 'link-btn', onClick: () => { ui.showWhy = true; render(); } }, 'Ver la explicación completa'),
+          percentagesView(v.advice),
+          h('p', { class: 'small' }, 'Lo recomendado era: ', h('strong', {}, v.advice.label), '.'),
+          h('a', { class: 'link-btn', href: '#/aprender/probabilidades' }, 'Lección: calcular tus probabilidades →'))
+        : h('button', { class: 'link-btn', onClick: () => { ui.showWhy = true; render(); } }, '¿De dónde salen los porcentajes?'),
     );
+  }
+
+  // Explicación paso a paso de los dos porcentajes de una decisión.
+  function percentagesView(advice) {
+    return h('ol', { class: 'pct-steps' },
+      explainPercentages(advice).map((s) => h('li', {},
+        h('strong', {}, s.title),
+        s.lines.map((l) => h('p', { class: 'small' }, l)),
+      )));
   }
 
   function decisionsList() {
@@ -378,7 +387,13 @@ export function tableScreen() {
       h('strong', { class: 'small' }, 'Tus decisiones en esta mano'),
       ui.decisions.map((d) => h('div', { class: `decision v-${d.grade}` },
         h('span', { class: 'verdict-icon', 'aria-hidden': 'true' }, GRADE_ICON[d.grade]),
-        h('span', {}, h('strong', {}, `${STREET_NAMES[d.street]}: ${d.did}.`), ' ', d.text),
+        h('div', {},
+          h('span', {}, h('strong', {}, `${STREET_NAMES[d.street]}: ${d.did}.`), ' ', d.text),
+          h('details', { class: 'pct-details' },
+            h('summary', {}, '¿De dónde salen los porcentajes?'),
+            percentagesView(d.advice),
+          ),
+        ),
       )),
     );
   }

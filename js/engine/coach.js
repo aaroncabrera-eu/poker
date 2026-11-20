@@ -6,6 +6,7 @@ import { situation, raiseTarget } from './bots.js';
 import { findOuts, ruleOf2and4, exactFormula } from './outs.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
+const ITERATIONS = 1500;
 
 // Descripción de las 2 cartas propias antes del flop.
 export function describeHole([a, b]) {
@@ -19,7 +20,7 @@ export function describeHole([a, b]) {
 }
 
 export function advise(game) {
-  const { p, la, opponents, equity, potOdds, strength } = situation(game, 1500);
+  const { p, la, opponents, equity, potOdds, strength } = situation(game, ITERATIONS);
   const lines = [];
 
   // 1. Qué tienes
@@ -38,12 +39,16 @@ export function advise(game) {
   const rivals = opponents === 1 ? '1 rival' : `${opponents} rivales`;
   lines.push(`Contra ${rivals}, ganarías más o menos el ${pct(equity)} de las veces (suponiendo cartas al azar; si alguien ha subido fuerte, seguramente menos).`);
 
+  // Datos para poder explicar después de dónde sale cada porcentaje.
+  const calc = { pot: game.pot, callAmount: la.callAmount, toCall: la.toCall, opponents, iterations: ITERATIONS, boardLen: game.board.length, hole: p.hole, outs: null };
+
   // 2b. Cómo calcularlo de cabeza: outs (solo en el flop y el turn)
   const math = [];
   if (game.board.length === 3 || game.board.length === 4) {
     const mine = evaluate([...p.hole, ...game.board]);
     const r = findOuts(p.hole, game.board, { minCategory: mine.category + 1 });
     const n = r.outs.length;
+    calc.outs = { n, unseen: r.unseen, cardsToCome: r.cardsToCome, current: mine.description };
     if (n > 0) {
       const names = [...new Set(r.outs.map((o) => o.hand.name))].join(', ').toLowerCase();
       math.push(`Tienes ${n} outs (cartas que te mejoran: ${names}).`);
@@ -89,7 +94,76 @@ export function advise(game) {
     raise: `Subir a ${amount} (raise)`,
     bet: `Apostar ${amount} (bet)`,
   }[rec];
-  return { rec, amount, label, why, lines, math, equity, potOdds, toCall: la.toCall, isBet: la.isBet };
+  return { rec, amount, label, why, lines, math, calc, equity, potOdds, toCall: la.toCall, isBet: la.isBet };
+}
+
+// "¿De dónde salen los porcentajes?": explicación paso a paso con los números de la jugada.
+// Devuelve una lista de apartados { title, lines }.
+export function explainPercentages(advice) {
+  const c = advice.calc;
+  const e = Math.round(advice.equity * 100);
+  const need = Math.round(advice.potOdds * 100);
+  const rivals = c.opponents === 1 ? '1 rival' : `${c.opponents} rivales`;
+  const sections = [];
+
+  // 1. Lo que necesitabas
+  if (c.toCall > 0) {
+    sections.push({
+      title: `Lo que necesitabas: ${need}%`,
+      lines: [
+        `Para seguir tenías que poner ${c.callAmount}. Si pagabas, el bote se quedaba en ${c.pot} + ${c.callAmount} = ${c.pot + c.callAmount}.`,
+        `Porcentaje necesario = lo que pagas ÷ bote después de pagar = ${c.callAmount} ÷ ${c.pot + c.callAmount} = ${need}%.`,
+        `Dicho de otra forma: arriesgas ${c.callAmount} para ganar ${c.pot}. Si ganas más de ${need} de cada 100 veces, a la larga sacas fichas.`,
+      ],
+    });
+  } else {
+    sections.push({
+      title: 'Lo que necesitabas: 0%',
+      lines: ['Nadie había apostado, así que seguir no costaba nada. Por eso pasar nunca es un error: la duda es solo si merece la pena apostar.'],
+    });
+  }
+
+  // 2. Tu probabilidad de ganar
+  const eqLines = [
+    `La app lo calcula por simulación: juega esta misma situación ${c.iterations.toLocaleString('es-ES')} veces, repartiendo al azar las cartas de ${rivals} y las de la mesa que faltan, y cuenta cuántas ganas. Te salió ${e} de cada 100.`,
+  ];
+  if (c.boardLen === 0) {
+    const fair = Math.round(100 / (c.opponents + 1));
+    const [a, b] = c.hole;
+    eqLines.push(`De cabeza, antes del flop se usan referencias: con ${c.opponents + 1} jugadores, una mano normal gana 1 de cada ${c.opponents + 1} veces (${fair}%). Tu ${e}% está ${e > fair * 1.15 ? 'por encima de esa media' : e < fair * 0.85 ? 'por debajo de esa media' : 'más o menos en la media'}.`);
+    if (a.rank === b.rank) eqLines.push('Las parejas de mano son de lo mejor que te pueden dar: contra un solo rival con dos cartas más bajas ganan alrededor del 80%.');
+    else if (Math.max(a.rank, b.rank) >= 12) eqLines.push('Con cartas altas ganas sobre todo cuando ligas pareja con ellas: una pareja alta suele ser suficiente con pocos rivales.');
+    else eqLines.push('Con cartas bajas y sin pareja dependes de ligar mucho en la mesa: por eso suelen ganar poco.');
+  } else if (c.outs && c.outs.n > 0) {
+    const { n, unseen, cardsToCome } = c.outs;
+    const mult = cardsToCome === 2 ? 4 : 2;
+    eqLines.push(`De cabeza, con los outs: tienes ${n} cartas que te mejoran y quedan ${unseen} por ver. ${n} × ${mult} ≈ ${ruleOf2and4(n, cardsToCome)}% de mejorar (cuenta exacta: ${exactFormula(n, unseen, cardsToCome)}).`);
+    eqLines.push(`Ese número no es exactamente tu probabilidad de ganar: con lo que tienes ahora (${c.outs.current}) a veces ya vas ganando sin mejorar, y a veces mejoras pero un rival tiene algo mejor. Por eso la simulación da ${e}%.`);
+  } else if (c.boardLen < 5) {
+    eqLines.push('De cabeza: ninguna carta te mejora por sí sola, así que lo que cuenta es si lo que tienes ya gana. Con más rivales, más fácil es que alguien tenga algo mejor.');
+  } else {
+    eqLines.push('En el river ya no salen más cartas: tu probabilidad es simplemente cuántas manos de los rivales son peores que la tuya.');
+  }
+  eqLines.push('Ojo: la simulación supone que los rivales pueden tener cualquier mano. Si alguien ha subido fuerte, lo normal es que tenga algo bueno y tu probabilidad real sea menor.');
+  sections.push({ title: `Tu probabilidad de ganar: ${e}%`, lines: eqLines });
+
+  // 3. La comparación
+  if (c.toCall > 0) {
+    sections.push({
+      title: 'La comparación',
+      lines: [e >= need
+        ? `${e}% es más que ${need}%: pagar sale rentable a la larga.${e - need >= 25 ? ' Y como la diferencia es grande, subir también es buena idea.' : ''}`
+        : `${e}% es menos que ${need}%: pagar te hace perder fichas a la larga. Lo correcto era retirarse.`],
+    });
+  } else {
+    sections.push({
+      title: 'La comparación',
+      lines: [advice.rec === 'bet'
+        ? `Con un ${e}% tu mano es fuerte: apostar hace que paguen las manos peores.`
+        : `Con un ${e}% tu mano no es tan fuerte como para apostar: lo prudente es pasar gratis.`],
+    });
+  }
+  return sections;
 }
 
 // Valora la jugada del humano comparándola con lo que recomendaba el entrenador.
