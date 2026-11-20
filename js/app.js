@@ -66,6 +66,7 @@ function route() {
   brand.hidden = !!r.back;
   title.textContent = r.title ?? '';
   document.title = r.title ? `${r.title} · Poker poco a poco` : 'Poker poco a poco';
+  view.dataset.route = path.startsWith('/aprender/') ? '/aprender/x' : path;
   view.replaceChildren(r.render());
   window.scrollTo(0, 0);
 }

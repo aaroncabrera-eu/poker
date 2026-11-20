@@ -419,8 +419,8 @@ a.tile:hover, a.tile:active { border-color: var(--accent); background: var(--sur
 .summary-title { font-size: 1.1rem; }
 .summary.ok .summary-title { color: var(--ok); }
 .net { font-size: 0.85rem; color: var(--muted); }
-.net.pos { color: var(--ok); }
-.net.neg { color: var(--bad); }
+.net.gain { color: var(--ok); }
+.net.loss { color: var(--bad); }
 .sd-list { display: grid; gap: 6px; }
 .sd-row { display: grid; grid-template-columns: 64px auto 1fr; align-items: center; gap: 8px; font-size: 0.85rem; }
 .sd-row.win .sd-name, .sd-row.win .sd-hand { color: var(--ok); font-weight: 600; }
@@ -557,3 +557,86 @@ a.tile:hover, a.tile:active { border-color: var(--accent); background: var(--sur
 .hint-cards { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
   padding: 6px 8px; border-radius: 10px; background: var(--felt-2); border: 1px solid #1d4a37; }
 .hint-pot { margin-left: auto; }
+
+/* ======================================================================
+   Distribución según el tamaño de pantalla
+   ====================================================================== */
+
+/* Móvil en vertical: mesa y panel se apilan (los contenedores no generan caja). */
+.table-main, .table-side { display: contents; }
+
+/* Inicio más compacto en móviles bajos, para que quepa sin deslizar. */
+.home .hero { padding: 12px 0 4px; }
+@media (max-height: 740px) {
+  .home { gap: 10px; }
+  .home .hero { gap: 6px; padding-top: 4px; }
+  .home .hero h1 { font-size: 1.6rem; }
+  .home .hero-cards .card { --w: 42px; }
+  .home .tile-big { min-height: 76px; padding: 14px 16px; }
+  .home .tiles-row .tile { min-height: 0; padding: 12px 14px; }
+}
+
+@media (min-width: 720px) {
+  /* ---- Inicio: título a la izquierda, opciones a la derecha ---- */
+  .view[data-route="/"] { max-width: 1040px; }
+  .home {
+    grid-template-columns: 1fr 1.15fr; align-items: center; gap: 48px;
+    min-height: calc(100dvh - var(--topbar) - env(safe-area-inset-top) - 72px);
+  }
+  .home .hero { text-align: left; justify-items: start; padding: 0; }
+  .home .hero h1 { font-size: 2.6rem; }
+  .home .hero-cards { margin-left: 10px; }
+
+  /* ---- Mesa: mesa a la izquierda, controles y explicaciones a la derecha ---- */
+  .view[data-route="/jugar"] { max-width: 1240px; padding-bottom: 16px; }
+  .table-screen.playing {
+    display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(320px, 1fr);
+    gap: 16px; align-items: stretch;
+    height: calc(100dvh - var(--topbar) - env(safe-area-inset-top) - 36px);
+  }
+  .table-main { display: flex; flex-direction: column; gap: 10px; min-height: 0; }
+  .table-main .table-felt { flex: 1; align-content: center; min-height: 0; }
+  .table-side {
+    display: flex; flex-direction: column; gap: 10px; min-height: 0;
+    overflow-y: auto; overscroll-behavior: contain; padding-right: 4px;
+  }
+  .table-side .dock {
+    position: static; margin: 0; padding: 0; max-height: none; overflow: visible;
+    background: none; border: 0; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none;
+  }
+  .table-side .history { margin-top: auto; }
+
+  /* Las cartas se adaptan a la altura disponible. */
+  .table-main .size-board .card { --w: clamp(40px, 11vh, 96px); }
+  .table-main .seat.me .size-md .card { --w: clamp(36px, 9vh, 76px); }
+  .table-main .opp .size-xs .card { --w: clamp(20px, 4.6vh, 40px); }
+  .table-main .opp .size-xs .card-rank { font-size: calc(var(--w) * 0.42); }
+  .table-main .opp .size-xs .card-suit { font-size: calc(var(--w) * 0.46); }
+}
+
+@media (min-width: 720px) {
+  /* Tapete: etiqueta arriba, cartas centradas en el espacio que quede */
+  .table-main .table-felt { display: flex; flex-direction: column; align-items: center; margin-top: 4px; }
+  .table-main .table-felt .cards { margin: auto 0; }
+  /* "Siguiente mano" siempre a la vista al final de la columna derecha */
+  .table-side .summary > .btn.primary:last-child { position: sticky; bottom: 0; box-shadow: 0 -8px 16px var(--surface); }
+}
+
+/* Pantallas anchas pero bajas (móvil en horizontal): versión compacta */
+@media (min-width: 720px) and (max-height: 520px) {
+  :root { --topbar: 44px; }
+  .view { padding-top: 10px; }
+  .view[data-route="/jugar"] { padding-bottom: 8px; }
+  .table-screen.playing { gap: 10px; height: calc(100dvh - var(--topbar) - env(safe-area-inset-top) - 20px); }
+  .table-main, .table-side { gap: 6px; }
+  .table-info { font-size: 0.72rem; }
+  .opp { padding: 5px 4px 7px; gap: 3px; }
+  .opp .card.back { display: none; }
+  .opp .opp-cards:not(:has(.card:not(.back))) { display: none; }
+  .table-main .table-felt { padding: 6px 10px 8px; gap: 4px; }
+  .table-main .seat.me { padding: 6px 12px; }
+  .table-main .size-board .card { --w: clamp(34px, 12vh, 60px); }
+  .table-main .seat.me .size-md .card { --w: clamp(32px, 10vh, 48px); }
+  .info-toggle { width: 28px; height: 28px; }
+  .cs-toggle { height: 30px; }
+}

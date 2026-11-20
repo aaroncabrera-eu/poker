@@ -41,6 +41,7 @@ export function tableScreen() {
 
   function renderSetup() {
     clearTimeout(timer);
+    root.classList.remove('playing');
     const set = (k, v) => {
       settings[k] = v;
       save(SETTINGS_KEY, settings);
@@ -421,7 +422,7 @@ export function tableScreen() {
 
     return h('div', { class: `summary ${iWon ? 'ok' : ''}` },
       h('strong', { class: 'summary-title' }, title),
-      h('p', { class: `net ${net > 0 ? 'pos' : net < 0 ? 'neg' : ''}` }, `Tu balance en esta mano: ${net > 0 ? '+' : ''}${net}`),
+      h('p', { class: `net ${net > 0 ? 'gain' : net < 0 ? 'loss' : ''}` }, `Tu balance en esta mano: ${net > 0 ? '+' : ''}${net}`),
       parts,
       decisionsList(),
       h('button', { class: 'btn primary', onClick: newHand }, 'Siguiente mano'),
@@ -444,19 +445,21 @@ export function tableScreen() {
     else if (game.phase === 'betting' && game.current.isHuman) controls = h('div', { class: 'dock' }, humanControls());
     else controls = h('div', { class: 'dock' }, waitingControls());
 
-    root.replaceChildren(...[
-      h('div', { class: 'table-info' },
-        h('span', {}, `Mano ${game.handNumber} · Ciegas ${game.sb}/${game.bb}`),
-        h('button', { class: 'link-btn', onClick: () => { game = null; renderSetup(); } }, 'Cambiar mesa'),
+    // Dos bloques: la mesa y el panel lateral. En pantallas anchas van uno al lado del otro;
+    // en el móvil en vertical se apilan (display: contents) y los controles quedan fijos abajo.
+    root.classList.add('playing');
+    root.replaceChildren(
+      h('div', { class: 'table-main' },
+        h('div', { class: 'table-info' },
+          h('span', {}, `Mano ${game.handNumber} · Ciegas ${game.sb}/${game.bb}`),
+          h('button', { class: 'link-btn', onClick: () => { game = null; renderSetup(); } }, 'Cambiar mesa'),
+        ),
+        h('div', { class: 'opps', style: { gridTemplateColumns: `repeat(${cols}, 1fr)` } }, opps.map(oppSeat)),
+        felt(),
+        mySeat(),
       ),
-      h('div', { class: 'opps', style: { gridTemplateColumns: `repeat(${cols}, 1fr)` } }, opps.map(oppSeat)),
-      felt(),
-      mySeat(),
-      narrator(),
-      verdictCard(),
-      controls,
-      historyLog(),
-    ].filter(Boolean));
+      h('div', { class: 'table-side' }, narrator(), verdictCard(), controls, historyLog()),
+    );
   }
 
   renderSetup();
