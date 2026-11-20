@@ -13,6 +13,10 @@ export const STREET_NAMES = { preflop: 'Preflop', flop: 'Flop', turn: 'Turn', ri
 const NEXT_STREET = { preflop: 'flop', flop: 'turn', turn: 'river' };
 const CARDS_PER_STREET = { flop: 3, turn: 1, river: 1 };
 
+// "Zorro iguala 10" / "Igualas 10": el texto cambia si el jugador eres tú.
+const say = (p, third, second) => (p.isHuman ? second : `${p.name} ${third}`);
+const cap = (t) => t.charAt(0).toUpperCase() + t.slice(1);
+
 export class Game {
   constructor({ players, smallBlind = 5, bigBlind = 10, startingStack = 1000, rng = Math.random, button } = {}) {
     if (players.length < 2) throw new Error('Hacen falta al menos 2 jugadores');
@@ -95,7 +99,7 @@ export class Game {
     for (const p of this.players) {
       if (p.stack === 0) {
         p.stack = this.startingStack;
-        this.emit('info', `${p.name} se había quedado sin fichas y recarga ${this.startingStack}.`, { player: p.id });
+        this.emit('info', say(p, `se había quedado sin fichas y recarga ${this.startingStack}.`, `Te habías quedado sin fichas: recargas ${this.startingStack}.`), { player: p.id });
       }
       Object.assign(p, { hole: [], bet: 0, totalBet: 0, folded: false, allIn: false, hasActed: false, actedAt: -1, lastAction: null });
     }
@@ -110,7 +114,7 @@ export class Game {
     const bbP = this.players[this.bbIndex];
     const sbAmt = this.put(sbP, this.sb);
     const bbAmt = this.put(bbP, this.bb);
-    this.emit('blinds', `${sbP.name} pone la ciega pequeña (${sbAmt}) y ${bbP.name} la ciega grande (${bbAmt}).`);
+    this.emit('blinds', `${cap(say(sbP, `pone la ciega pequeña (${sbAmt})`, `pones la ciega pequeña (${sbAmt})`))} y ${say(bbP, `la ciega grande (${bbAmt})`, `tú la ciega grande (${bbAmt})`)}.`);
 
     this.currentBet = Math.max(sbP.bet, bbP.bet);
     this.minRaise = this.bb;
@@ -162,16 +166,16 @@ export class Game {
 
     if (type === 'fold') {
       p.folded = true;
-      this.emit('action', `${p.name} se retira (fold).`, { player: p.id, action: 'fold' });
+      this.emit('action', say(p, 'se retira (fold).', 'Te retiras (fold).'), { player: p.id, action: 'fold' });
     } else if (type === 'check') {
       if (!la.canCheck) throw new Error('No se puede pasar: hay una apuesta');
-      this.emit('action', `${p.name} pasa (check).`, { player: p.id, action: 'check' });
+      this.emit('action', say(p, 'pasa (check).', 'Pasas (check).'), { player: p.id, action: 'check' });
     } else if (type === 'call') {
       if (!la.canCall) throw new Error('No hay nada que igualar');
       const a = this.put(p, la.callAmount);
       const txt = p.allIn
-        ? `${p.name} iguala con todo lo que le queda: ${a} (all-in).`
-        : a === p.bet ? `${p.name} iguala (call) ${a}.` : `${p.name} iguala (call) a ${p.bet} (pone ${a} más).`;
+        ? say(p, `iguala con todo lo que le queda: ${a} (all-in).`, `Igualas con todo lo que te queda: ${a} (all-in).`)
+        : a === p.bet ? say(p, `iguala (call) ${a}.`, `Igualas (call) ${a}.`) : say(p, `iguala (call) a ${p.bet} (pone ${a} más).`, `Igualas (call) a ${p.bet} (pones ${a} más).`);
       this.emit('action', txt,
         { player: p.id, action: 'call', amount: a });
     } else if (type === 'raise') {
@@ -189,7 +193,7 @@ export class Game {
       this.currentBet = to;
       this.put(p, to - p.bet);
       const allIn = p.allIn ? ' (all-in)' : '';
-      this.emit('action', wasBet ? `${p.name} apuesta (bet) ${to}${allIn}.` : `${p.name} sube (raise) a ${to}${allIn}.`,
+      this.emit('action', wasBet ? say(p, `apuesta (bet) ${to}${allIn}.`, `Apuestas (bet) ${to}${allIn}.`) : say(p, `sube (raise) a ${to}${allIn}.`, `Subes (raise) a ${to}${allIn}.`),
         { player: p.id, action: wasBet ? 'bet' : 'raise', amount: to });
     } else {
       throw new Error(`Acción desconocida: ${type}`);
@@ -258,7 +262,7 @@ export class Game {
     this.phase = 'hand-over';
     this.toAct = -1;
     this.result = { uncontested: true, winners: [w.id], pots: [{ amount, eligible: [w.id], winners: [w.id] }], hands: {}, won: { [w.id]: amount } };
-    this.emit('win', `Todos los demás se han retirado: ${w.name} gana el bote de ${amount} sin enseñar sus cartas.`, { player: w.id });
+    this.emit('win', `Todos los demás se han retirado: ${say(w, `gana el bote de ${amount} sin enseñar sus cartas.`, `ganas el bote de ${amount} sin enseñar tus cartas.`)}`, { player: w.id });
   }
 
   // Divide el bote en bote principal y botes secundarios según lo que ha puesto cada uno.
@@ -320,11 +324,13 @@ export class Game {
       const label = pots.length === 1 ? 'el bote' : idx === 0 ? 'el bote principal' : `el bote secundario ${idx}`;
       const names = best.map((id) => this.players[id].name);
       if (pot.eligible.length === 1) {
-        this.emit('win', `${names[0]} recupera ${pot.amount} que nadie pudo igualar.`, { player: best[0] });
+        this.emit('win', cap(say(this.players[best[0]], `recupera ${pot.amount} que nadie pudo igualar.`, `recuperas ${pot.amount} que nadie pudo igualar.`)), { player: best[0] });
       } else if (best.length === 1) {
-        this.emit('win', `${names[0]} gana ${label} (${pot.amount}) con ${hands[best[0]].description}.`, { player: best[0] });
+        this.emit('win', cap(say(this.players[best[0]], `gana ${label} (${pot.amount}) con ${hands[best[0]].description}.`, `ganas ${label} (${pot.amount}) con ${hands[best[0]].description}.`)), { player: best[0] });
       } else {
-        this.emit('win', `${names.join(' y ')} empatan y se reparten ${label} (${pot.amount}).`, { players: best });
+        this.emit('win', best.some((id) => this.players[id].isHuman)
+          ? `Empatas con ${names.filter((n, k) => !this.players[best[k]].isHuman).join(' y ')} y os repartís ${label} (${pot.amount}).`
+          : `${names.join(' y ')} empatan y se reparten ${label} (${pot.amount}).`, { players: best });
       }
     });
 

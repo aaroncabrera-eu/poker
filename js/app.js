@@ -11,6 +11,7 @@ import { winnerExercise } from './screens/exercise-winner.js';
 import { handExercise } from './screens/exercise-hand.js';
 import { outsExercise } from './screens/exercise-outs.js';
 import { decideExercise } from './screens/exercise-decide.js';
+import { oddsExercise } from './screens/exercise-odds.js';
 import { tableScreen } from './screens/table.js';
 import { calculatorScreen } from './screens/calculator.js';
 import { lessonsScreen, lessonScreen } from './screens/lessons.js';
@@ -21,6 +22,7 @@ const routes = {
   '/practicar/que-mano': { title: '¿Qué mano tienes?', back: '/practicar', render: handExercise },
   '/practicar/quien-gana': { title: '¿Qué mano gana?', back: '/practicar', render: winnerExercise },
   '/practicar/outs': { title: '¿Cuántos outs?', back: '/practicar', render: outsExercise },
+  '/practicar/probabilidad': { title: '¿Qué probabilidad?', back: '/practicar', render: oddsExercise },
   '/practicar/que-harias': { title: '¿Qué harías?', back: '/practicar', render: decideExercise },
   '/jugar': { title: 'Jugar', back: '/', render: tableScreen },
   '/aprender': { title: 'Aprender', back: '/', render: lessonsScreen },

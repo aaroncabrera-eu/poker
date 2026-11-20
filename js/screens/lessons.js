@@ -38,6 +38,7 @@ function block(b) {
     ));
   }
   if (b.tip) return h('p', { class: 'lesson-tip' }, b.tip);
+  if (b.math) return h('div', { class: 'lesson-math' }, b.math.split('\n').map((l) => h('div', {}, l)));
   return null;
 }
 

@@ -5,13 +5,13 @@ import { renderCard, renderCards } from '../ui/cards.js';
 import { sameCard } from '../engine/cards.js';
 import { Game, STREET_NAMES } from '../engine/game.js';
 import { decideBot, raiseTarget, BOT_NAMES, LEVELS } from '../engine/bots.js';
-import { advise } from '../engine/coach.js';
+import { advise, judgeAction } from '../engine/coach.js';
 import { evaluate, compareHands, coreCards } from '../engine/hands.js';
 import { explainComparison } from '../engine/explain.js';
 import { load, save } from '../storage.js';
 
 const SETTINGS_KEY = 'settings:table';
-const DEFAULTS = { bots: 3, level: 'easy', auto: false };
+const DEFAULTS = { bots: 3, level: 'easy', auto: false, judge: true };
 const BOT_DELAY = 1100;
 
 const NEXT_STREET_LABEL = {
@@ -28,7 +28,7 @@ export function tableScreen() {
   const settings = load(SETTINGS_KEY, DEFAULTS);
   let game = null;
   let timer = null;
-  const ui = { seen: 0, fresh: [], hint: null, raiseOpen: false, raiseTo: 0 };
+  const ui = { seen: 0, fresh: [], hint: null, raiseOpen: false, raiseTo: 0, verdict: null, showWhy: false, decisions: [], cache: null };
 
   const alive = () => root.isConnected;
 
@@ -65,6 +65,14 @@ export function tableScreen() {
           h('span', { class: 'small muted block' }, 'Los bots juegan solos con una pausa. Si lo desactivas, pulsas "Siguiente" para cada jugada.'),
         ),
       ),
+      h('label', { class: 'field toggle' },
+        h('input', { type: 'checkbox', checked: settings.judge, onChange: (e) => set('judge', e.target.checked) }),
+        h('span', { class: 'toggle-ui', 'aria-hidden': 'true' }),
+        h('span', {},
+          h('span', { class: 'field-label' }, 'Valorar mis jugadas'),
+          h('span', { class: 'small muted block' }, 'Después de cada decisión te dice si fue buena, aceptable o mejorable, y por qué.'),
+        ),
+      ),
       h('p', { class: 'small muted' }, 'Empiezas con 1000 fichas. Ciegas 5/10. Si alguien se queda sin fichas, recarga.'),
       h('button', { class: 'btn primary big', onClick: start }, 'Sentarse a la mesa'),
     );
@@ -80,6 +88,8 @@ export function tableScreen() {
   function newHand() {
     game.startHand();
     ui.seen = 0;
+    ui.decisions = [];
+    ui.verdict = null;
     afterStep();
     window.scrollTo({ top: 0 });
   }
@@ -89,6 +99,8 @@ export function tableScreen() {
     ui.seen = game.log.length;
     ui.hint = null;
     ui.raiseOpen = false;
+    if (game.phase === 'betting' && game.current.isHuman) ui.verdict = null;
+    ui.showWhy = false;
     render();
     clearTimeout(timer);
     if (settings.auto && game.phase === 'betting' && !game.current.isHuman) timer = setTimeout(botStep, BOT_DELAY);
@@ -105,7 +117,27 @@ export function tableScreen() {
     afterStep();
   }
 
+  // La pista se calcula una vez por decisión y se reutiliza para valorar tu jugada.
+  function getAdvice() {
+    const key = `${game.handNumber}:${game.log.length}`;
+    if (ui.cache?.key !== key) ui.cache = { key, advice: advise(game) };
+    return ui.cache.advice;
+  }
+
+  function describeMine(action, la) {
+    if (action.type === 'fold') return 'Te retiraste';
+    if (action.type === 'check') return 'Pasaste';
+    if (action.type === 'call') return `Igualaste ${la.callAmount}`;
+    return la.isBet ? `Apostaste ${action.amount}` : `Subiste a ${action.amount}`;
+  }
+
   function humanAct(action) {
+    if (settings.judge) {
+      const la = game.legalActions();
+      const advice = getAdvice();
+      ui.verdict = { ...judgeAction(advice, action), did: describeMine(action, la), street: game.street, advice };
+      ui.decisions.push(ui.verdict);
+    }
     game.act(action);
     afterStep();
   }
@@ -217,7 +249,19 @@ export function tableScreen() {
     };
     return h('div', { class: 'hint' },
       h('div', { class: 'hint-head' }, h('strong', {}, 'Pista'), h('button', { class: 'link-btn', onClick: () => { ui.hint = null; render(); } }, 'Cerrar')),
+      h('div', { class: 'hint-cards' },
+        h('span', { class: 'small muted' }, 'Tú'),
+        renderCards(game.human.hole, { size: 'xs' }),
+        game.board.length > 0 && h('span', { class: 'small muted' }, 'Mesa'),
+        game.board.length > 0 && renderCards(game.board, { size: 'xs' }),
+        h('span', { class: 'small muted hint-pot' }, `Bote ${game.pot}`),
+      ),
       a.lines.map((l) => h('p', {}, l)),
+      a.math.length > 0 && h('div', { class: 'rule-box' },
+        h('strong', {}, 'Cómo se calcula'),
+        a.math.map((l) => h('p', { class: 'small' }, l)),
+        h('a', { class: 'link-btn', href: '#/aprender/probabilidades' }, 'Aprender a calcularlo →'),
+      ),
       h('p', { class: 'hint-rec' }, 'Recomendación: ', h('strong', {}, a.label)),
       h('p', {}, a.why),
       h('p', { class: 'small muted' }, 'Es una guía para aprender, no una regla fija.'),
@@ -227,14 +271,24 @@ export function tableScreen() {
 
   function raisePanel(la) {
     const verb = la.isBet ? 'Apostar' : 'Subir a';
-    const amountEl = h('strong', {}, ui.raiseTo);
-    const confirm = h('button', { class: 'btn primary', onClick: () => humanAct({ type: 'raise', amount: ui.raiseTo }) }, `${verb} ${ui.raiseTo}`);
-    const setTo = (v) => {
+    const valid = (v) => Number.isInteger(v) && ((v >= la.minRaiseTo && v <= la.maxRaiseTo) || v === la.maxRaiseTo);
+    const error = h('p', { class: 'raise-error', 'aria-live': 'polite' });
+    const confirm = h('button', { class: 'btn primary', onClick: () => valid(ui.raiseTo) && humanAct({ type: 'raise', amount: ui.raiseTo }) }, `${verb} ${ui.raiseTo}`);
+    const setTo = (v, fromInput = false) => {
       ui.raiseTo = v;
-      amountEl.textContent = v;
-      confirm.textContent = `${verb} ${v}`;
-      slider.value = v;
+      const ok = valid(v);
+      confirm.disabled = !ok;
+      confirm.textContent = ok ? `${verb} ${v}` : verb;
+      error.textContent = ok ? '' : v > la.maxRaiseTo ? `Solo tienes ${la.maxRaiseTo} en total (contando lo que ya has puesto).` : `El mínimo es ${la.minRaiseTo}.`;
+      if (ok) slider.value = v;
+      if (!fromInput) input.value = v;
     };
+    const input = h('input', {
+      type: 'number', class: 'amount-input', inputmode: 'numeric', min: la.minRaiseTo, max: la.maxRaiseTo, step: 1, value: ui.raiseTo,
+      'aria-label': 'Escribe la cantidad',
+      onInput: (e) => setTo(Math.round(Number(e.target.value)), true),
+      onKeydown: (e) => e.key === 'Enter' && confirm.click(),
+    });
     const slider = h('input', {
       type: 'range', class: 'range', min: la.minRaiseTo, max: la.maxRaiseTo, step: game.sb, value: ui.raiseTo,
       'aria-label': 'Cantidad',
@@ -242,7 +296,9 @@ export function tableScreen() {
     });
     const preset = (label, v) => h('button', { class: 'btn chip', onClick: () => setTo(v) }, label);
     return h('div', { class: 'raise-panel' },
-      h('div', { class: 'raise-amount' }, h('span', { class: 'muted' }, verb), amountEl),
+      h('label', { class: 'raise-amount' }, h('span', { class: 'muted' }, `${verb} (escribe o desliza)`), input),
+      h('p', { class: 'small muted' }, `Entre ${la.minRaiseTo} y ${la.maxRaiseTo} (all-in).`),
+      error,
       slider,
       h('div', { class: 'presets' },
         preset('Mínimo', la.minRaiseTo),
@@ -271,11 +327,12 @@ export function tableScreen() {
           ui.raiseOpen = true;
           ui.raiseTo = la.minRaiseTo;
           render();
+          window.scrollTo({ top: 0 });
         }),
       ),
       ui.hint
         ? hintPanel()
-        : h('button', { class: 'btn hint-btn', onClick: () => { ui.hint = advise(game); render(); } }, '¿Qué hago? · Pista'),
+        : h('button', { class: 'btn hint-btn', onClick: () => { ui.hint = getAdvice(); render(); window.scrollTo({ top: 0 }); } }, '¿Qué hago? · Pista'),
     );
   }
 
@@ -291,6 +348,38 @@ export function tableScreen() {
     if (settings.auto) return h('div', { class: 'controls' }, h('p', { class: 'thinking' }, `${p.name} está pensando…`), skip);
     return h('div', { class: 'controls' },
       h('button', { class: 'btn primary', onClick: botStep }, `Siguiente: le toca a ${p.name}`), skip);
+  }
+
+  const GRADE_ICON = { good: '✓', ok: '~', bad: '✗' };
+
+  function verdictCard() {
+    const v = ui.verdict;
+    if (!v || game.phase === 'hand-over') return null;
+    return h('div', { class: `verdict v-${v.grade}` },
+      h('div', { class: 'verdict-head' },
+        h('span', { class: 'verdict-icon', 'aria-hidden': 'true' }, GRADE_ICON[v.grade]),
+        h('strong', {}, v.title),
+        h('span', { class: 'small muted' }, v.did),
+      ),
+      h('p', {}, v.text),
+      ui.showWhy
+        ? h('div', { class: 'verdict-why' },
+          v.advice.lines.map((l) => h('p', { class: 'small' }, l)),
+          v.advice.math.map((l) => h('p', { class: 'small' }, l)),
+          h('p', { class: 'small' }, 'Lo recomendado era: ', h('strong', {}, v.advice.label), '.'))
+        : h('button', { class: 'link-btn', onClick: () => { ui.showWhy = true; render(); } }, 'Ver la explicación completa'),
+    );
+  }
+
+  function decisionsList() {
+    if (!ui.decisions.length) return null;
+    return h('div', { class: 'decisions' },
+      h('strong', { class: 'small' }, 'Tus decisiones en esta mano'),
+      ui.decisions.map((d) => h('div', { class: `decision v-${d.grade}` },
+        h('span', { class: 'verdict-icon', 'aria-hidden': 'true' }, GRADE_ICON[d.grade]),
+        h('span', {}, h('strong', {}, `${STREET_NAMES[d.street]}: ${d.did}.`), ' ', d.text),
+      )),
+    );
   }
 
   function summary() {
@@ -334,6 +423,7 @@ export function tableScreen() {
       h('strong', { class: 'summary-title' }, title),
       h('p', { class: `net ${net > 0 ? 'pos' : net < 0 ? 'neg' : ''}` }, `Tu balance en esta mano: ${net > 0 ? '+' : ''}${net}`),
       parts,
+      decisionsList(),
       h('button', { class: 'btn primary', onClick: newHand }, 'Siguiente mano'),
     );
   }
@@ -351,8 +441,8 @@ export function tableScreen() {
     const cols = opps.length <= 3 ? opps.length : opps.length === 4 ? 2 : 3;
     let controls;
     if (game.phase === 'hand-over') controls = summary();
-    else if (game.phase === 'betting' && game.current.isHuman) controls = humanControls();
-    else controls = waitingControls();
+    else if (game.phase === 'betting' && game.current.isHuman) controls = h('div', { class: 'dock' }, humanControls());
+    else controls = h('div', { class: 'dock' }, waitingControls());
 
     root.replaceChildren(...[
       h('div', { class: 'table-info' },
@@ -363,6 +453,7 @@ export function tableScreen() {
       felt(),
       mySeat(),
       narrator(),
+      verdictCard(),
       controls,
       historyLog(),
     ].filter(Boolean));

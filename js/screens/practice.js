@@ -5,6 +5,7 @@ const EXERCISES = [
   { href: '#/practicar/que-mano', title: '¿Qué mano tienes?', sub: 'Encuentra tu mejor combinación de 5 cartas.', statsKey: 'stats:hand' },
   { href: '#/practicar/quien-gana', title: '¿Qué mano gana?', sub: 'Dos jugadores, una mesa: elige al ganador.', statsKey: 'stats:winner' },
   { href: '#/practicar/outs', title: '¿Cuántos outs tienes?', sub: 'Cuenta las cartas que te ayudan y calcula de cabeza.', statsKey: 'stats:outs' },
+  { href: '#/practicar/probabilidad', title: '¿Qué probabilidad tienes?', sub: 'Calcula de cabeza y mira la cuenta paso a paso.', statsKey: 'stats:odds' },
   { href: '#/practicar/que-harias', title: '¿Qué harías?', sub: 'Un rival apuesta: ¿pagas o te retiras?', statsKey: 'stats:decide' },
 ];
 

@@ -31,3 +31,9 @@ test('flushDrawSuit', () => {
   assert.equal(flushDrawSuit(parseCards('Ah 7h'), parseCards('Kh 9h 2c')), 'h');
   assert.equal(flushDrawSuit(parseCards('Ac 7d'), parseCards('Kh 9h 2c')), null);
 });
+
+test('exactFormula escribe la cuenta y cuadra', async () => {
+  const { exactFormula } = await import('../js/engine/outs.js');
+  assert.equal(exactFormula(9, 46, 1), '9 outs entre 46 cartas = 9/46 = 20%');
+  assert.equal(exactFormula(9, 47, 2), 'fallar las dos cartas = 38/47 × 37/46 = 65%, así que ligar = 100% − 65% = 35%');
+});

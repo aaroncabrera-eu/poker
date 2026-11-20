@@ -1,6 +1,7 @@
 import { h } from '../ui/dom.js';
 import { renderCards } from '../ui/cards.js';
 import { parseCards } from '../engine/cards.js';
+import { LESSONS } from '../content/lessons.js';
 
 const tile = (href, title, subtitle, { big = false, soon = false } = {}) =>
   h('a', { class: `tile ${big ? 'tile-big' : ''} ${soon ? 'is-soon' : ''}`, href },
@@ -22,7 +23,7 @@ export function homeScreen() {
       tile('#/jugar', 'Jugar', 'Mesa contra bots, con pistas en cada jugada', { big: true }),
       tile('#/practicar', 'Practicar', 'Ejercicios cortos para entrenar', { big: true }),
       h('div', { class: 'tiles-row' },
-        tile('#/aprender', 'Aprender', '7 lecciones cortas'),
+        tile('#/aprender', 'Aprender', `${LESSONS.length} lecciones cortas`),
         tile('#/calculadora', 'Calculadora', 'Probabilidades explicadas'),
       ),
     ),

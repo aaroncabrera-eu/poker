@@ -5,6 +5,7 @@
 //   { cards: 'Ah Kh', caption: '...' } cartas de ejemplo
 //   { table: [['cab', 'cab'], ['a', 'b'], ...] }  tabla (primera fila = cabecera)
 //   { tip: 'texto' }                   recuadro destacado
+//   { math: 'línea\nlínea' }           cuenta o fórmula, en un recuadro
 
 export const LESSONS = [
   {
@@ -91,6 +92,45 @@ export const LESSONS = [
     ],
     practice: { href: '#/practicar/outs', label: 'Practicar: ¿Cuántos outs tienes?' },
     practice2: { href: '#/calculadora', label: 'Comprobarlo en la calculadora' },
+  },
+  {
+    id: 'probabilidades',
+    title: 'Calcular tus probabilidades paso a paso',
+    sub: 'De dónde salen los porcentajes de ganar y perder',
+    blocks: [
+      { p: 'Calcular probabilidades en poker es, casi siempre, contar: cuántas cartas te sirven y cuántas pueden salir. No hace falta saber matemáticas, solo seguir unos pasos.' },
+      { h: '1. La idea básica' },
+      { math: 'Probabilidad = cartas que te sirven ÷ cartas que pueden salir' },
+      { p: 'Ejemplo: en una baraja de 52 cartas hay 13 corazones. La probabilidad de que la primera carta sea un corazón es 13 ÷ 52 = 25%.' },
+      { h: '2. Cuenta las cartas que no ves' },
+      { table: [['Momento', 'Cartas que ves', 'Cartas que no ves'], ['Flop', '2 tuyas + 3 de la mesa = 5', '52 − 5 = 47'], ['Turn', '2 tuyas + 4 de la mesa = 6', '52 − 6 = 46']] },
+      { p: 'Las cartas de los rivales tampoco las ves, así que cuentan como desconocidas. Puede que un out tuyo esté en la mano de un rival, pero como no lo sabes, se cuentan todas igual.' },
+      { h: '3. Si queda una carta (del turn al river)' },
+      { math: 'Probabilidad = outs ÷ 46' },
+      { p: 'Con un proyecto de color (9 outs): 9 ÷ 46 = 19,6%. Como 1 ÷ 46 es más o menos un 2%, multiplicar outs × 2 da casi lo mismo: 9 × 2 = 18%. De ahí sale la regla del 2.' },
+      { h: '4. Si quedan dos cartas (del flop al river)' },
+      { p: 'El truco es calcular la probabilidad de fallar las dos veces y restarla del 100%. Con 9 outs y 47 cartas desconocidas:' },
+      { math: 'Fallar el turn: 38 de 47 cartas no te sirven → 38/47\nFallar también el river: 37/46\nFallar las dos: 38/47 × 37/46 = 65%\nLigar al menos una: 100% − 65% = 35%' },
+      { p: 'Son dos cartas y cada out vale más o menos un 2% en cada una, por eso la regla dice outs × 4: 9 × 4 = 36%, casi igual que el 35% exacto.' },
+      { tip: 'Con más de 8 outs la regla del 4 se pasa un poco. Corrección: outs × 4 − (outs − 8). Con 15 outs: 60 − 7 = 53% (exacto: 54%).' },
+      { h: '5. De "ligar" a "ganar o perder"' },
+      { p: 'Los outs te dicen cuántas veces mejoras. Para saber cuántas veces ganas, piensa en qué tiene el rival:' },
+      { list: [
+        'Si vas por detrás y solo ganas si ligas: tu probabilidad de ganar ≈ la de ligar, y la de perder ≈ el resto.',
+        'Si ya vas por delante: ganas salvo que el rival ligue. Cuenta SUS outs y réstalo del 100%.',
+        'Ojo con los outs "sucios": una carta que te da escalera pero pone 3 del mismo palo en la mesa puede dar color a un rival. Si dudas, cuenta algún out menos.',
+      ] },
+      { cards: 'Qh Qs 9d 6c 2h', caption: 'Tienes Q♥ Q♠ y la mesa es 9♦ 6♣ 2♥. Si el rival tiene A♣ K♦, necesita un As o un Rey: 6 outs → 6 × 4 ≈ 24% para él. Tú ganas más o menos el 76% de las veces.' },
+      { h: '6. Antes del flop: memoriza referencias' },
+      { p: 'Antes del flop faltan 5 cartas y no se puede contar de cabeza. Lo que hacen los jugadores es memorizar unos cuantos enfrentamientos típicos:' },
+      { table: [['Enfrentamiento', 'Ejemplo', 'Probabilidades'], ['Pareja contra dos cartas más altas', '7♠7♥ vs A♦K♣', '≈ 55% / 45%'], ['Pareja contra dos cartas más bajas', 'Q♠Q♥ vs 9♦8♣', '≈ 82% / 18%'], ['Pareja alta contra pareja baja', 'K♠K♥ vs 8♦8♣', '≈ 80% / 20%'], ['Mano dominada (comparten carta)', 'A♠K♥ vs A♦Q♣', '≈ 74% / 26%'], ['Dos cartas altas contra dos bajas', 'A♠J♥ vs 9♦7♣', '≈ 63% / 37%']] },
+      { h: '7. Contra varios rivales' },
+      { p: 'Cada rival es otra oportunidad de que alguien te gane, así que tus probabilidades bajan. Una mano "normal" gana 1 de cada (rivales + 1) veces: 50% contra 1 rival, 33% contra 2, 25% contra 3.' },
+      { h: '8. Cómo lo calcula la app' },
+      { p: 'La calculadora y la pista juegan tu situación miles de veces repartiendo al azar las cartas que faltan, y cuentan cuántas veces ganas, empatas o pierdes. Se llama simulación (método de Montecarlo). De cabeza no se puede hacer, pero con los outs y estas referencias te acercas mucho.' },
+    ],
+    practice: { href: '#/practicar/probabilidad', label: 'Practicar: ¿Qué probabilidad tienes?' },
+    practice2: { href: '#/calculadora', label: 'Ver las cuentas en la calculadora' },
   },
   {
     id: 'pot-odds',

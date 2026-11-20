@@ -26,6 +26,16 @@ export function hitChance(outs, unseen, cardsToCome) {
   return 1 - ((unseen - outs) / unseen) * ((unseen - outs - 1) / (unseen - 1));
 }
 
+const pct = (x) => `${Math.round(x * 100)}%`;
+
+// La cuenta exacta escrita con números, para enseñar a hacerla.
+export function exactFormula(outs, unseen, cardsToCome) {
+  if (cardsToCome === 1) return `${outs} outs entre ${unseen} cartas = ${outs}/${unseen} = ${pct(outs / unseen)}`;
+  const miss = ((unseen - outs) / unseen) * ((unseen - outs - 1) / (unseen - 1));
+  const m = Math.round(miss * 100);
+  return `fallar las dos cartas = ${unseen - outs}/${unseen} × ${unseen - outs - 1}/${unseen - 1} = ${m}%, así que ligar = 100% − ${m}% = ${100 - m}%`;
+}
+
 // Regla del 2 y del 4: outs x 4 en el flop (quedan 2 cartas), outs x 2 en el turn (queda 1).
 export const ruleOf2and4 = (outs, cardsToCome) => outs * (cardsToCome === 2 ? 4 : 2);
 

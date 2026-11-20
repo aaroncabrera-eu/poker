@@ -3,6 +3,7 @@
 import { rankName } from './cards.js';
 import { evaluate, compareHands } from './hands.js';
 import { situation, raiseTarget } from './bots.js';
+import { findOuts, ruleOf2and4, exactFormula } from './outs.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 
@@ -36,6 +37,23 @@ export function advise(game) {
   // 2. Probabilidad
   const rivals = opponents === 1 ? '1 rival' : `${opponents} rivales`;
   lines.push(`Contra ${rivals}, ganarías más o menos el ${pct(equity)} de las veces (suponiendo cartas al azar; si alguien ha subido fuerte, seguramente menos).`);
+
+  // 2b. Cómo calcularlo de cabeza: outs (solo en el flop y el turn)
+  const math = [];
+  if (game.board.length === 3 || game.board.length === 4) {
+    const mine = evaluate([...p.hole, ...game.board]);
+    const r = findOuts(p.hole, game.board, { minCategory: mine.category + 1 });
+    const n = r.outs.length;
+    if (n > 0) {
+      const names = [...new Set(r.outs.map((o) => o.hand.name))].join(', ').toLowerCase();
+      math.push(`Tienes ${n} outs (cartas que te mejoran: ${names}).`);
+      math.push(`De cabeza: ${n} × ${r.cardsToCome === 2 ? 4 : 2} ≈ ${ruleOf2and4(n, r.cardsToCome)}% de mejorar ${r.cardsToCome === 2 ? 'de aquí al river' : 'en el river'}.`);
+      math.push(`Cuenta exacta: ${exactFormula(n, r.unseen, r.cardsToCome)}.`);
+      math.push('Mejorar no es lo mismo que ganar: a veces ganas sin mejorar y a veces pierdes aunque mejores. Por eso el porcentaje de arriba es distinto.');
+    } else {
+      math.push('Ninguna carta te mejora por sí sola: lo que tienes ahora es lo que cuenta.');
+    }
+  }
 
   // 3. Coste de seguir y recomendación
   let rec;
@@ -71,5 +89,38 @@ export function advise(game) {
     raise: `Subir a ${amount} (raise)`,
     bet: `Apostar ${amount} (bet)`,
   }[rec];
-  return { rec, amount, label, why, lines, equity, potOdds };
+  return { rec, amount, label, why, lines, math, equity, potOdds, toCall: la.toCall, isBet: la.isBet };
+}
+
+// Valora la jugada del humano comparándola con lo que recomendaba el entrenador.
+// action: { type: 'fold' | 'check' | 'call' | 'raise' }. Devuelve { grade: 'good' | 'ok' | 'bad', title, text }.
+export function judgeAction(advice, action) {
+  const did = action.type === 'raise' ? (advice.isBet ? 'bet' : 'raise') : action.type;
+  const e = pct(advice.equity);
+  const need = pct(advice.potOdds);
+  const ahead = advice.equity - advice.potOdds;
+  const G = (grade, text) => ({ grade, text, title: { good: 'Buena jugada', ok: 'Jugada aceptable', bad: 'Jugada mejorable' }[grade] });
+
+  switch (advice.rec) {
+    case 'fold':
+      if (did === 'fold') return G('good', `Bien retirado: tenías un ${e} y necesitabas un ${need} para que pagar compensara.`);
+      if (did === 'call') return G('bad', `Pagaste con un ${e} cuando necesitabas un ${need}. Hecho muchas veces, esto pierde fichas.`);
+      return G('bad', `Subir con una mano floja (${e}) es un farol. A veces funciona, pero a la larga cuesta fichas, sobre todo contra rivales que lo pagan todo.`);
+    case 'call':
+      if (did === 'call') return G('good', `Bien pagado: tu ${e} es mayor que el ${need} que necesitabas.`);
+      if (did === 'raise') return G('ok', `Vas algo por delante (${e} frente a ${need}), pero no tanto: subir arriesga más fichas. Igualar era suficiente.`);
+      return G(ahead > 0.1 ? 'bad' : 'ok', `Demasiado prudente: tenías un ${e} y solo necesitabas un ${need}. Pagar habría sido rentable a la larga.`);
+    case 'raise':
+      if (did === 'raise') return G('good', `Bien subido: con un ${e} vas claramente por delante y haces que paguen más.`);
+      if (did === 'call') return G('ok', `Correcto, aunque con un ${e} podías subir para ganar más cuando vas por delante.`);
+      return G('bad', `Tiraste una mano muy buena: tenías un ${e} y solo necesitabas un ${need}.`);
+    case 'bet':
+      if (did === 'bet') return G('good', `Bien apostado: tu mano (${e}) es fuerte y así cobras a las manos peores.`);
+      if (did === 'check') return G('ok', `Algo pasivo: con un ${e} conviene apostar. Pasando dejas ver cartas gratis a los demás.`);
+      return G('bad', 'No hacía falta retirarse: nadie había apostado y podías pasar gratis, y además tu mano era fuerte.');
+    default: // check
+      if (did === 'check') return G('good', `Bien pasado: con un ${e} no merece la pena apostar, y pasar es gratis.`);
+      if (did === 'fold') return G('bad', 'No hacía falta retirarse: nadie había apostado y podías pasar gratis.');
+      return G('ok', `Apostar con un ${e} es casi un farol. Puede funcionar si los rivales se retiran, pero arriesgas fichas con una mano floja.`);
+  }
 }

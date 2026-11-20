@@ -3,7 +3,7 @@
 import { h } from './dom.js';
 import { renderCards } from './cards.js';
 import { SUIT_NAMES, rankName } from '../engine/cards.js';
-import { groupOuts, hitChance, ruleOf2and4, flushDrawSuit } from '../engine/outs.js';
+import { groupOuts, hitChance, ruleOf2and4, flushDrawSuit, exactFormula } from '../engine/outs.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 
@@ -49,6 +49,7 @@ export function outsExplanation(hole, board, r) {
       toCome === 2
         ? h('p', {}, `Quedan 2 cartas (turn y river): outs × 4 = ${n} × 4 ≈ ${rule}%. Exacto: ${pct(exact)}.`)
         : h('p', {}, `Queda 1 carta (river): outs × 2 = ${n} × 2 ≈ ${rule}%. Exacto: ${pct(exact)}.`),
+      h('p', { class: 'small' }, `Cuenta exacta: ${exactFormula(n, r.unseen, toCome)}.`),
       toCome === 2 && h('p', { class: 'small muted' }, `Solo para la siguiente carta: ${n} × 2 ≈ ${n * 2}% (exacto ${pct(next1)}).`),
       h('p', { class: 'small muted' }, `Quedan ${r.unseen} cartas que no ves. Con muchos outs (más de 8) la regla del 4 se pasa un poco.`),
     ),

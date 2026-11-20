@@ -37,3 +37,14 @@ test('describeHole', () => {
   assert.equal(describeHole(parseCards('Js Qs')), 'Reina y Jota del mismo palo (suited), seguidas (connectors)');
   assert.equal(describeHole(parseCards('Ah 7d')), 'As y Siete de distinto palo (offsuit)');
 });
+
+test('judgeAction valora las jugadas', async () => {
+  const { judgeAction } = await import('../js/engine/coach.js');
+  const base = { equity: 0.2, potOdds: 0.3, isBet: false };
+  assert.equal(judgeAction({ ...base, rec: 'fold' }, { type: 'fold' }).grade, 'good');
+  assert.equal(judgeAction({ ...base, rec: 'fold' }, { type: 'call' }).grade, 'bad');
+  assert.equal(judgeAction({ equity: 0.6, potOdds: 0.25, rec: 'call' }, { type: 'fold' }).grade, 'bad');
+  assert.equal(judgeAction({ equity: 0.3, potOdds: 0.25, rec: 'call' }, { type: 'fold' }).grade, 'ok');
+  assert.equal(judgeAction({ equity: 0.3, potOdds: 0, rec: 'check', isBet: true }, { type: 'raise' }).grade, 'ok');
+  assert.equal(judgeAction({ equity: 0.3, potOdds: 0, rec: 'check', isBet: true }, { type: 'fold' }).grade, 'bad');
+});

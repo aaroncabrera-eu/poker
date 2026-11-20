@@ -507,3 +507,53 @@ a.tile:hover, a.tile:active { border-color: var(--accent); background: var(--sur
 .lesson-tip { padding: 12px 14px; border-radius: 12px; background: rgba(214,180,106,.08); border: 1px solid rgba(214,180,106,.35); }
 .lesson-tip::before { content: 'Consejo · '; font-weight: 700; color: var(--accent); }
 .lesson-actions { display: grid; gap: 8px; margin-top: 8px; }
+
+/* ---------- Barra inferior fija de la mesa ---------- */
+.dock {
+  position: sticky; bottom: 0; z-index: 10;
+  margin: 0 calc(-1 * var(--gutter));
+  padding: 10px var(--gutter) calc(10px + env(safe-area-inset-bottom));
+  max-height: 40dvh; overflow-y: auto; overscroll-behavior: contain;
+  background: rgba(10, 13, 12, 0.94);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  border-top: 1px solid var(--line);
+  box-shadow: 0 -10px 24px rgba(0,0,0,.35);
+}
+.dock .hint, .dock .raise-panel { animation: none; }
+
+/* Cantidad escrita */
+.amount-input {
+  width: 9ch; padding: 6px 10px; border-radius: 10px;
+  background: var(--surface-2); color: var(--accent); border: 1px solid var(--line);
+  font: inherit; font-size: 1.4rem; font-weight: 700; text-align: right; font-variant-numeric: tabular-nums;
+}
+.amount-input:focus { outline: none; border-color: var(--accent); }
+.raise-error { color: var(--bad); font-size: 0.85rem; min-height: 0; }
+.raise-error:empty { display: none; }
+.btn.primary:disabled { opacity: .45; }
+
+/* Valoración de jugadas */
+.verdict { display: grid; gap: 6px; padding: 12px 14px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--muted); font-size: 0.9rem; }
+.verdict-head { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
+.verdict-icon { font-weight: 800; width: 1.2em; text-align: center; }
+.v-good { border-left-color: var(--ok); } .v-good .verdict-icon, .v-good strong:first-of-type { color: var(--ok); }
+.v-ok { border-left-color: var(--accent); } .v-ok .verdict-icon, .v-ok .verdict-head strong { color: var(--accent); }
+.v-bad { border-left-color: var(--bad); } .v-bad .verdict-icon, .v-bad .verdict-head strong { color: var(--bad); }
+.verdict-why { display: grid; gap: 4px; padding-top: 6px; border-top: 1px solid var(--line); }
+.decisions { display: grid; gap: 6px; padding-top: 8px; border-top: 1px solid var(--line); }
+.decision { display: grid; grid-template-columns: 1.2em 1fr; gap: 6px; font-size: 0.85rem; }
+.decision strong { color: var(--text); }
+
+/* Pasos de una solución y fórmulas */
+.steps { margin: 0; padding-left: 20px; display: grid; gap: 10px; }
+.steps li { line-height: 1.5; }
+.step-cards { margin-top: 6px; }
+.lesson-math {
+  display: grid; gap: 4px; padding: 12px 14px; border-radius: 12px;
+  background: var(--surface-2); border: 1px solid var(--line);
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 0.85rem; color: var(--text);
+}
+.hint-cards { display: flex; align-items: center; gap: 6px; flex-wrap: wrap;
+  padding: 6px 8px; border-radius: 10px; background: var(--felt-2); border: 1px solid #1d4a37; }
+.hint-pot { margin-left: auto; }
