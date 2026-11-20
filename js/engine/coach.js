@@ -3,7 +3,7 @@
 import { rankName } from './cards.js';
 import { evaluate, compareHands } from './hands.js';
 import { situation, raiseTarget } from './bots.js';
-import { findOuts, ruleOf2and4, exactFormula } from './outs.js';
+import { findOuts, ruleOf2and4, exactFormula, outsBreakdown } from './outs.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 const ITERATIONS = 1500;
@@ -48,15 +48,14 @@ export function advise(game) {
     const mine = evaluate([...p.hole, ...game.board]);
     const r = findOuts(p.hole, game.board, { minCategory: mine.category + 1 });
     const n = r.outs.length;
-    calc.outs = { n, unseen: r.unseen, cardsToCome: r.cardsToCome, current: mine.description };
+    const breakdown = outsBreakdown(p.hole, game.board, r);
+    calc.outs = { n, unseen: r.unseen, cardsToCome: r.cardsToCome, current: mine.description, breakdown };
+    math.push(`Tienes ${mine.description}. Cartas que te mejorarían (outs):`);
+    math.push(...breakdown);
     if (n > 0) {
-      const names = [...new Set(r.outs.map((o) => o.hand.name))].join(', ').toLowerCase();
-      math.push(`Tienes ${n} outs (cartas que te mejoran: ${names}).`);
       math.push(`De cabeza: ${n} × ${r.cardsToCome === 2 ? 4 : 2} ≈ ${ruleOf2and4(n, r.cardsToCome)}% de mejorar ${r.cardsToCome === 2 ? 'de aquí al river' : 'en el river'}.`);
       math.push(`Cuenta exacta: ${exactFormula(n, r.unseen, r.cardsToCome)}.`);
       math.push('Mejorar no es lo mismo que ganar: a veces ganas sin mejorar y a veces pierdes aunque mejores. Por eso el porcentaje de arriba es distinto.');
-    } else {
-      math.push('Ninguna carta te mejora por sí sola: lo que tienes ahora es lo que cuenta.');
     }
   }
 
@@ -138,7 +137,9 @@ export function explainPercentages(advice) {
   } else if (c.outs && c.outs.n > 0) {
     const { n, unseen, cardsToCome } = c.outs;
     const mult = cardsToCome === 2 ? 4 : 2;
-    eqLines.push(`De cabeza, con los outs: tienes ${n} cartas que te mejoran y quedan ${unseen} por ver. ${n} × ${mult} ≈ ${ruleOf2and4(n, cardsToCome)}% de mejorar (cuenta exacta: ${exactFormula(n, unseen, cardsToCome)}).`);
+    eqLines.push(`De cabeza, con los outs. Tienes ${c.outs.current}; estas cartas te mejorarían:`);
+    eqLines.push(...c.outs.breakdown);
+    eqLines.push(`Resultado: ${n} × ${mult} ≈ ${ruleOf2and4(n, cardsToCome)}% de mejorar. Cuenta exacta: ${exactFormula(n, unseen, cardsToCome)}.`);
     eqLines.push(`Ese número no es exactamente tu probabilidad de ganar: con lo que tienes ahora (${c.outs.current}) a veces ya vas ganando sin mejorar, y a veces mejoras pero un rival tiene algo mejor. Por eso la simulación da ${e}%.`);
   } else if (c.boardLen < 5) {
     eqLines.push('De cabeza: ninguna carta te mejora por sí sola, así que lo que cuenta es si lo que tienes ya gana. Con más rivales, más fácil es que alguien tenga algo mejor.');

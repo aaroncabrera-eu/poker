@@ -3,13 +3,13 @@
 import { h } from './dom.js';
 import { renderCards } from './cards.js';
 import { SUIT_NAMES, rankName } from '../engine/cards.js';
-import { groupOuts, hitChance, ruleOf2and4, flushDrawSuit, exactFormula } from '../engine/outs.js';
+import { groupOuts, hitChance, ruleOf2and4, flushDrawSuit, exactFormula, outsBreakdown } from '../engine/outs.js';
 
 const pct = (x) => `${Math.round(x * 100)}%`;
 
 export function outsExplanation(hole, board, r) {
   const n = r.outs.length;
-  if (n === 0) return h('p', {}, 'Ninguna carta mejora tu mano por sí sola.');
+  if (n === 0) return h('div', { class: 'outs-view' }, outsBreakdown(hole, board, r).map((l) => h('p', {}, l)));
   const groups = groupOuts(r.outs);
   const lines = [];
 
@@ -25,11 +25,8 @@ export function outsExplanation(hole, board, r) {
     lines.push(`Proyecto de escalera: te vale cualquier ${ranks.join(' o ')}. ${nRanks === 2 ? 'Es una escalera abierta (dos valores te sirven).' : nRanks === 1 ? 'Es una escalera interna o gutshot (solo te sirve un valor).' : ''} Cada valor tiene 4 cartas, una por palo.`);
     if (flushGroup && suit) lines.push('Si alguna carta te da escalera y color a la vez, se cuenta una sola vez.');
   }
-  for (const g of groups.filter((x) => ![4, 5, 8].includes(x.category))) {
-    const ranks = [...new Set(g.cards.map((c) => c.rank))].sort((a, b) => b - a).map((x) => rankName(x));
-    const list = ranks.length > 1 ? `${ranks.slice(0, -1).join(', ')} o ${ranks.at(-1)}` : ranks[0];
-    lines.push(`${g.name}: te vale cualquier ${list} que quede en la baraja (${g.cards.length} ${g.cards.length === 1 ? 'carta' : 'cartas'}).`);
-  }
+  // Recuento carta a carta, suma total, cartas que no cuentan y por qué × 4 / × 2.
+  lines.push(...outsBreakdown(hole, board, r));
 
   const toCome = r.cardsToCome;
   const exact = hitChance(n, r.unseen, toCome);
