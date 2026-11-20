@@ -48,3 +48,35 @@ test('judgeAction valora las jugadas', async () => {
   assert.equal(judgeAction({ equity: 0.3, potOdds: 0, rec: 'check', isBet: true }, { type: 'raise' }).grade, 'ok');
   assert.equal(judgeAction({ equity: 0.3, potOdds: 0, rec: 'check', isBet: true }, { type: 'fold' }).grade, 'bad');
 });
+
+test('ciega grande sin subidas: subir cuenta como apostar, no como retirarse', async () => {
+  const { judgeAction } = await import('../js/engine/coach.js');
+  // Situación real del fallo: toCall = 0 pero isBet = false (ya hay una ciega grande puesta).
+  const advice = { rec: 'bet', equity: 0.6, potOdds: 0, toCall: 0, isBet: false };
+  const v = judgeAction(advice, { type: 'raise', amount: 20 });
+  assert.equal(v.grade, 'good');
+  assert.doesNotMatch(v.text, /retirarse/);
+  const v2 = judgeAction({ ...advice, rec: 'check', equity: 0.3 }, { type: 'raise', amount: 20 });
+  assert.notEqual(v2.grade, 'bad');
+  assert.doesNotMatch(v2.text, /retirarse/);
+});
+
+test('en una mesa real, apostar o subir nunca se valora como "retirarse"', async () => {
+  const { advise, judgeAction } = await import('../js/engine/coach.js');
+  const { decideBot } = await import('../js/engine/bots.js');
+  for (let h = 0; h < 40; h++) {
+    const g = new Game({ players: [{ name: 'Tú', isHuman: true }, { name: 'A' }, { name: 'B' }] });
+    g.startHand();
+    while (g.phase !== 'hand-over') {
+      if (g.phase === 'street-end') { g.next(); continue; }
+      if (g.current.isHuman) {
+        const la = g.legalActions();
+        if (la.canRaise) {
+          const v = judgeAction(advise(g), { type: 'raise', amount: la.minRaiseTo });
+          assert.doesNotMatch(v.text, /retirarse|Tiraste/, `${g.street}: ${v.text}`);
+        }
+        g.act({ type: la.canCheck ? 'check' : 'call' });
+      } else g.act(decideBot(g, 'easy'));
+    }
+  }
+});

@@ -92,7 +92,8 @@ export function advise(game) {
     call: `Igualar ${la.callAmount} (call)`,
     check: 'Pasar (check)',
     raise: `Subir a ${amount} (raise)`,
-    bet: `Apostar ${amount} (bet)`,
+    // Desde la ciega grande antes del flop no es "apostar" sino "subir", aunque no haya que pagar nada.
+    bet: la.isBet ? `Apostar ${amount} (bet)` : `Subir a ${amount} (raise)`,
   }[rec];
   return { rec, amount, label, why, lines, math, calc, equity, potOdds, toCall: la.toCall, isBet: la.isBet };
 }
@@ -169,7 +170,9 @@ export function explainPercentages(advice) {
 // Valora la jugada del humano comparándola con lo que recomendaba el entrenador.
 // action: { type: 'fold' | 'check' | 'call' | 'raise' }. Devuelve { grade: 'good' | 'ok' | 'bad', title, text }.
 export function judgeAction(advice, action) {
-  const did = action.type === 'raise' ? (advice.isBet ? 'bet' : 'raise') : action.type;
+  // Poner fichas cuando no había que pagar nada (apostar, o subir desde la ciega grande antes del flop)
+  // cuenta como "apostar"; poner más cuando sí había que pagar cuenta como "subir".
+  const did = action.type === 'raise' ? (advice.toCall > 0 ? 'raise' : 'bet') : action.type;
   const e = pct(advice.equity);
   const need = pct(advice.potOdds);
   const ahead = advice.equity - advice.potOdds;

@@ -628,3 +628,15 @@ a.tile:hover, a.tile:active { border-color: var(--accent); background: var(--sur
 .table-screen:not(.playing) .toggle-ui::after { width: 16px; height: 16px; }
 .table-screen:not(.playing) .toggle input:checked + .toggle-ui::after { transform: translateX(16px); }
 .table-screen:not(.playing) .btn.big { min-height: 48px; font-size: 1rem; }
+
+/* Mesa en ordenador: la página cabe exacta en la ventana, sin deslizador.
+   Si la pista o el resumen son largos, solo se desliza la columna derecha. */
+@media (min-width: 760px) {
+  .view[data-route="/jugar"]:has(.playing) { padding-top: 12px; padding-bottom: 12px; }
+  .table-screen.playing {
+    height: calc(100dvh - var(--topbar) - env(safe-area-inset-top) - 24px);
+    grid-template-rows: minmax(0, 1fr); align-items: stretch;
+  }
+  .table-main { align-content: start; min-height: 0; overflow-y: auto; }
+  .table-side { position: static; max-height: none; min-height: 0; }
+}
