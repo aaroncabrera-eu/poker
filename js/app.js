@@ -73,3 +73,8 @@ function route() {
 
 window.addEventListener('hashchange', route);
 route();
+
+// Service worker: hace que siempre veas la última versión publicada y que la app abra sin conexión.
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('sw.js').catch(() => { /* sin service worker la app funciona igual */ });
+}
